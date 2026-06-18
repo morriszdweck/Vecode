@@ -15,3 +15,6 @@ You can try Vecode today by two methods:
 2: go to https://vecode.netlify.app
 
 ### Free tier (no API key setup) coming soon
+
+
+reccomended APIs: https://github.com/YoannDev90/awesome-free-ai-api
