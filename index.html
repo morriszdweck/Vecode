@@ -54,6 +54,56 @@
   --shadow:0 8px 24px rgba(0,0,0,0.5);
 }
 
+/* ---------- Theme: Dracula ---------- */
+[data-theme="dracula"]{
+  --bg:#282a36; --bg2:#21222c; --bg3:#383a4a; --bg4:#44475a;
+  --border:#383a4a; --border2:#565b72;
+  --text:#f8f8f2; --text2:#b8bcc8; --text3:#6272a4;
+  --accent:#bd93f9; --accent2:#9a78d4; --accent-soft:rgba(189,147,249,0.12);
+  --green:#50fa7b; --red:#ff5555; --yellow:#f1fa8c; --purple:#bd93f9; --orange:#ffb86c; --cyan:#8be9fd;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: Gruvbox ---------- */
+[data-theme="gruvbox"]{
+  --bg:#282828; --bg2:#1d2021; --bg3:#3c3836; --bg4:#504945;
+  --border:#3c3836; --border2:#665c54;
+  --text:#ebdbb2; --text2:#a89984; --text3:#928374;
+  --accent:#fabd2f; --accent2:#d79921; --accent-soft:rgba(250,189,47,0.12);
+  --green:#b8bb26; --red:#fb4934; --yellow:#fabd2f; --purple:#d3869b; --orange:#fe8019; --cyan:#8ec07c;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: Nord ---------- */
+[data-theme="nord"]{
+  --bg:#2e3440; --bg2:#272c36; --bg3:#3b4252; --bg4:#434c5e;
+  --border:#3b4252; --border2:#4c566a;
+  --text:#e5e9f0; --text2:#aeb4c0; --text3:#616e88;
+  --accent:#88c0d0; --accent2:#6a9fb4; --accent-soft:rgba(136,192,208,0.12);
+  --green:#a3be8c; --red:#bf616a; --yellow:#ebcb8b; --purple:#b48ead; --orange:#d08770; --cyan:#8fbcbb;
+  --shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* ---------- Theme: Rosé Pine ---------- */
+[data-theme="rosepine"]{
+  --bg:#191724; --bg2:#1f1d2e; --bg3:#26233a; --bg4:#2e2a47;
+  --border:#26233a; --border2:#403d5a;
+  --text:#e0def4; --text2:#908caa; --text3:#6e6a86;
+  --accent:#c4a7e7; --accent2:#a28b d5; --accent-soft:rgba(196,167,231,0.12);
+  --green:#31748f; --red:#eb6f92; --yellow:#f6c177; --purple:#c4a7e7; --orange:#ebbcba; --cyan:#9ccfd8;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: One Dark ---------- */
+[data-theme="onedark"]{
+  --bg:#282c34; --bg2:#21252b; --bg3:#2c313a; --bg4:#3b4048;
+  --border:#2c313a; --border2:#4b5263;
+  --text:#abb2bf; --text2:#7f848e; --text3:#5c6370;
+  --accent:#61afef; --accent2:#4a9fe8; --accent-soft:rgba(97,175,239,0.12);
+  --green:#98c379; --red:#e06c75; --yellow:#e5c07b; --purple:#c678dd; --orange:#d19a66; --cyan:#56b6c2;
+  --shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:8px;height:8px}
@@ -207,25 +257,6 @@ textarea{resize:none;line-height:1.5}
 .theme-card .swatch{width:14px;height:14px;border-radius:50%}
 .theme-card .tn{font-size:10px;color:var(--text2);text-align:center}
 
-/* ===== PROVIDER TOGGLE ===== */
-.provider-toggle{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
-.provider-btn{flex:1;padding:10px 14px;font-size:12px;font-weight:600;color:var(--text2);text-align:center;cursor:pointer;transition:.15s;border:none;background:none}
-.provider-btn:hover{background:var(--bg3)}
-.provider-btn.active{background:var(--accent);color:#fff}
-.provider-btn .pv-sub{display:block;font-size:10px;font-weight:400;opacity:0.8;margin-top:2px}
-.byok-fields{transition:opacity .2s}
-.byok-fields.disabled{opacity:0.4;pointer-events:none}
-.free-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--green);background:rgba(63,185,80,0.1);padding:3px 9px;border-radius:16px;border:1px solid rgba(63,185,80,0.25)}
-.credit-note{font-size:11px;color:var(--text3);line-height:1.6;padding:10px 13px;background:var(--bg3);border-radius:var(--radius-sm);border:1px solid var(--border)}
-.credit-note a{color:var(--accent);text-decoration:none}
-.credit-note a:hover{text-decoration:underline}
-
-/* ===== SUBTLE FOOTER CREDIT ===== */
-.ssh-credit{padding:5px 14px;font-size:10px;color:var(--text3);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex-shrink:0}
-.ssh-credit a{color:var(--text2);text-decoration:none;transition:color .15s}
-.ssh-credit a:hover{color:var(--accent)}
-.ssh-credit .sep{color:var(--text3);opacity:0.5}
-
 /* ===== EXPORT DROPDOWN ===== */
 .export-menu{position:fixed;top:var(--topbar-h);right:16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);display:none;flex-direction:column;min-width:240px;z-index:50;overflow:hidden}
 .export-menu.active{display:flex}
@@ -363,7 +394,6 @@ textarea{resize:none;line-height:1.5}
       <div id="consoleWrap">
         <div class="pane-header" style="border-bottom:none"><span class="title">Console</span><div class="spacer"></div><button id="consoleClear">Clear</button></div>
         <div id="consoleLog"></div>
-        <div class="ssh-credit">Free tier by <a href="https://ssh.codes/" target="_blank" rel="noopener">SSH</a> <span class="sep">·</span> <a href="https://x.com/sshthedev" target="_blank" rel="noopener">@sshthedev</a></div>
       </div>
     </div>
   </div>
@@ -382,49 +412,41 @@ textarea{resize:none;line-height:1.5}
     <div class="modal-header"><h2>Settings</h2><button class="close-btn" id="closeModal">&times;</button></div>
     <div class="modal-body">
       <div class="field">
-        <label>AI Provider</label>
-        <div class="provider-toggle">
-          <button class="provider-btn active" data-provider="free" id="provFree">Free Tier<span class="pv-sub">DeepSeek V4 · No key needed</span></button>
-          <button class="provider-btn" data-provider="byok" id="provByok">BYOK<span class="pv-sub">OpenAI-compatible · Your key</span></button>
-        </div>
-        <div id="freeTierInfo" style="margin-top:8px">
-          <span class="free-badge">● Free tier active — no API key needed</span>
-          <div class="credit-note" style="margin-top:8px">Free tier powered by <strong>Pro AI</strong> by <a href="https://ssh.codes/" target="_blank" rel="noopener">SSH</a>. Limit: 1M tokens/day. Thanks for providing this free service to the community.</div>
-        </div>
-      </div>
-      <div class="field">
         <label>Theme</label>
         <div class="theme-grid" id="themeGrid">
           <div class="theme-card" data-theme="carbon"><div class="swatches"><span class="swatch" style="background:#0d1117"></span><span class="swatch" style="background:#2f81f7"></span><span class="swatch" style="background:#3fb950"></span></div><div class="tn">Carbon</div></div>
           <div class="theme-card" data-theme="slate"><div class="swatches"><span class="swatch" style="background:#f6f8fa"></span><span class="swatch" style="background:#0969de"></span><span class="swatch" style="background:#1a7f37"></span></div><div class="tn">Slate</div></div>
           <div class="theme-card" data-theme="solarized"><div class="swatches"><span class="swatch" style="background:#002b36"></span><span class="swatch" style="background:#268bd2"></span><span class="swatch" style="background:#b58900"></span></div><div class="tn">Solarized</div></div>
           <div class="theme-card" data-theme="tokyo"><div class="swatches"><span class="swatch" style="background:#1a1b26"></span><span class="swatch" style="background:#7aa2f7"></span><span class="swatch" style="background:#9ece6a"></span></div><div class="tn">Tokyo Night</div></div>
+          <div class="theme-card" data-theme="dracula"><div class="swatches"><span class="swatch" style="background:#282a36"></span><span class="swatch" style="background:#bd93f9"></span><span class="swatch" style="background:#50fa7b"></span></div><div class="tn">Dracula</div></div>
+          <div class="theme-card" data-theme="gruvbox"><div class="swatches"><span class="swatch" style="background:#282828"></span><span class="swatch" style="background:#fabd2f"></span><span class="swatch" style="background:#8ec07c"></span></div><div class="tn">Gruvbox</div></div>
+          <div class="theme-card" data-theme="nord"><div class="swatches"><span class="swatch" style="background:#2e3440"></span><span class="swatch" style="background:#88c0d0"></span><span class="swatch" style="background:#a3be8c"></span></div><div class="tn">Nord</div></div>
+          <div class="theme-card" data-theme="rosepine"><div class="swatches"><span class="swatch" style="background:#191724"></span><span class="swatch" style="background:#c4a7e7"></span><span class="swatch" style="background:#9ccfd8"></span></div><div class="tn">Rosé Pine</div></div>
+          <div class="theme-card" data-theme="onedark"><div class="swatches"><span class="swatch" style="background:#282c34"></span><span class="swatch" style="background:#61afef"></span><span class="swatch" style="background:#98c379"></span></div><div class="tn">One Dark</div></div>
         </div>
       </div>
-      <div id="byokFields" class="byok-fields disabled">
-        <div class="field">
-          <label>API Key (BYOK)</label>
-          <input type="password" id="setApiKey" placeholder="sk-...">
-          <div class="desc">Stored locally in your browser. Never sent anywhere except your configured endpoint.</div>
-          <div id="apiStatus" class="status-na">Not configured</div>
+      <div class="field">
+        <label>API Key</label>
+        <input type="password" id="setApiKey" placeholder="sk-...">
+        <div class="desc">Stored locally in your browser. Never sent anywhere except your configured endpoint.</div>
+        <div id="apiStatus" class="status-na">Not configured</div>
+      </div>
+      <div class="field">
+        <label>Base Endpoint URL</label>
+        <input type="text" id="setEndpoint" placeholder="https://api.openai.com/v1">
+        <div class="desc">Any OpenAI-compatible endpoint.</div>
+        <div class="preset-row">
+          <span class="preset-chip" data-ep="https://api.openai.com/v1" data-model="gpt-4o">OpenAI</span>
+          <span class="preset-chip" data-ep="https://openrouter.ai/api/v1" data-model="anthropic/claude-3.5-sonnet">OpenRouter</span>
+          <span class="preset-chip" data-ep="https://api.together.xyz/v1" data-model="meta-llama/Llama-3-70b-chat-hf">Together AI</span>
+          <span class="preset-chip" data-ep="https://generativelanguage.googleapis.com/v1beta/openai" data-model="gemini-1.5-pro">Gemini</span>
+          <span class="preset-chip" data-ep="http://localhost:11434/v1" data-model="llama3">Ollama (local)</span>
         </div>
-        <div class="field">
-          <label>Base Endpoint URL</label>
-          <input type="text" id="setEndpoint" placeholder="https://api.openai.com/v1">
-          <div class="desc">Any OpenAI-compatible endpoint.</div>
-          <div class="preset-row">
-            <span class="preset-chip" data-ep="https://api.openai.com/v1" data-model="gpt-4o">OpenAI</span>
-            <span class="preset-chip" data-ep="https://openrouter.ai/api/v1" data-model="anthropic/claude-3.5-sonnet">OpenRouter</span>
-            <span class="preset-chip" data-ep="https://api.together.xyz/v1" data-model="meta-llama/Llama-3-70b-chat-hf">Together AI</span>
-            <span class="preset-chip" data-ep="https://generativelanguage.googleapis.com/v1beta/openai" data-model="gemini-1.5-pro">Gemini</span>
-            <span class="preset-chip" data-ep="http://localhost:11434/v1" data-model="llama3">Ollama (local)</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Model Name</label>
-          <input type="text" id="setModel" placeholder="gpt-4o">
-          <div class="desc">The model ID to use for chat completions.</div>
-        </div>
+      </div>
+      <div class="field">
+        <label>Model Name</label>
+        <input type="text" id="setModel" placeholder="gpt-4o">
+        <div class="desc">The model ID to use for chat completions.</div>
       </div>
       <div class="field">
         <label>System Prompt</label>
@@ -509,14 +531,6 @@ textarea{resize:none;line-height:1.5}
           <li>Use <strong>New</strong> to wipe the VFS and start fresh.</li>
         </ul>
       </div>
-      <div class="help-section">
-        <h3>Free tier &amp; credits</h3>
-        <p>Vecode includes a built-in <strong>Free Tier</strong> powered by Pro AI — no API key required. It uses DeepSeek V4 Flash and is great for trying things out. Limits: 10 requests/minute, 1000/hour, 1 million tokens/day.</p>
-        <div class="callout">
-          <strong>Credit:</strong> The free tier is made possible by <strong><a href="https://ssh.codes/" target="_blank" rel="noopener">SSH</a></strong> (<a href="https://x.com/sshthedev" target="_blank" rel="noopener">@sshthedev</a>), who generously provides the Pro AI API as a free public service. Thank you for supporting the developer community.
-        </div>
-        <p>For heavier use or more advanced models, switch to <strong>BYOK</strong> in Settings and bring your own API key from any OpenAI-compatible provider.</p>
-      </div>
     </div>
     <div class="modal-footer"><button class="save-btn" id="closeHelpBtn">Got it</button></div>
   </div>
@@ -552,7 +566,6 @@ const State = {
     systemPrompt: '',
     temperature: 0.2,
     theme: 'carbon',
-    provider: 'free',
   },
   messages: [],
   vfs: {},
@@ -560,7 +573,6 @@ const State = {
   isRunning: false,
   abortController: null,
   maxIterations: 20,
-  freeConversationId: null,
 };
 
 const DEFAULT_SYSTEM_PROMPT = `You are Vecode, an elite AI coding agent that builds web applications in a browser sandbox. You are easy to use, opinionated about quality, and you ship working software. You have a Virtual File System (VFS) and tools to write code, execute JavaScript, and render live previews.
@@ -635,54 +647,6 @@ Treat failure and emptiness as moments for direction, not mood. Explain what wen
 
 Keep the register conversational and tuned: plain verbs, sentence case, no filler, with tone matched to the brand and the audience. Let each element do exactly one job. A label labels, an example demonstrates, and nothing quietly does double duty.`;
 
-const FREE_TIER_SUFFIX = `
-
-## Tool Calling Format (IMPORTANT)
-You are running on a system that does NOT support native function calling. Instead, you must output tool calls as a JSON code block using the exact format below. The system will parse and execute them.
-
-When you want to call a tool, output it in a fenced code block with the tag \`tool\`:
-
-\`\`\`tool
-{"name": "write_file", "args": {"path": "index.html", "content": "<!DOCTYPE html>..."}}
-\`\`\`
-
-After a tool block, the system will execute it and give you the result. Then you continue.
-
-You may call ONE tool per response. Wait for the result before calling the next tool.
-
-When the task is fully complete, call task_complete:
-
-\`\`\`tool
-{"name": "task_complete", "args": {"message": "I built a todo app with..."}}
-\`\`\`
-
-## CRITICAL RULES FOR TOOL CALLS
-- Do NOT write long explanations or thinking before a tool call. Be brief — one sentence max, then the tool call.
-- Keep each write_file call SMALL. If a file is large, write it in parts: first write the HTML structure, then in the next response add CSS, then JS. This avoids response truncation.
-- The API has a token limit. If your response gets cut off, the tool call fails. Write files in chunks of under 3000 characters when possible.
-- Always close your tool block with \`\`\` after the JSON.
-- Never output promotional text, signatures, or attributions. You are Vecode, nothing else.`;
-
-/* ---------------- WORD FILTER ---------------- */
-const WordFilter = {
-  banned: [
-    /Pro AI,?\s*built by SSH\.?/gi,
-    /https:\/\/ssh\.codes\/?/gi,
-    /https:\/\/x\.com\/sshthedev\/?/gi,
-    /\bPro AI\b(?!\s+API)/gi,
-    /built by SSH\.?/gi,
-  ],
-  clean(text){
-    if(!text) return text;
-    let out = text;
-    for(const re of this.banned){
-      out = out.replace(re, '');
-    }
-    // clean up double spaces / trailing artifacts left by removals
-    out = out.replace(/[ \t]{2,}/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
-    return out;
-  }
-};
 
 /* ---------------- 2. VIRTUAL FILE SYSTEM ---------------- */
 const VFS = {
@@ -803,10 +767,7 @@ const Settings = {
   save(){
     try{ localStorage.setItem('vecode_settings', JSON.stringify(State.settings)); }catch(e){}
   },
-  isConfigured(){
-    if(State.settings.provider === 'free') return true;
-    return !!(State.settings.apiKey && State.settings.endpoint && State.settings.model);
-  },
+  isConfigured(){ return !!(State.settings.apiKey && State.settings.endpoint && State.settings.model); },
   applyTheme(theme){
     document.body.setAttribute('data-theme', theme);
     State.settings.theme = theme;
@@ -891,185 +852,6 @@ const APIClient = {
   }
 };
 
-/* ---------------- 5b. PRO AI CLIENT (free tier, no native tool calling) ---------------- */
-const PRO_AI_URL = 'https://pro-ai.ssh.codes/chat';
-const ProAIClient = {
-  // Send a prompt to the Pro AI API. Returns { text, conversation_id } or throws.
-  // NOTE: This API does NOT support streaming — we get the full response at once.
-  async chat(prompt, system, signal){
-    const body = {
-      prompt,
-      conversation_id: State.freeConversationId || undefined,
-      system: system || undefined,
-      format: 'json',
-    };
-    let resp;
-    try{
-      resp = await fetch(PRO_AI_URL + '?format=json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(body),
-        signal,
-      });
-    }catch(e){
-      if(e.name === 'AbortError') throw e;
-      throw new Error('Network error contacting free tier API: ' + e.message);
-    }
-    if(!resp.ok){
-      let msg = 'HTTP ' + resp.status;
-      try{
-        const txt = await resp.text();
-        if(resp.status === 429 || txt.includes('rate limit')) msg = 'Rate limit exceeded (10/min, 1000/hour, 1M tokens/day). Please wait a moment and try again.';
-        else msg = txt.slice(0, 300) || msg;
-      }catch(e){}
-      throw new Error(msg);
-    }
-    const ct = resp.headers.get('content-type') || '';
-    let text, conversationId;
-    if(ct.includes('application/json')){
-      const data = await resp.json();
-      // The API returns { reply, conversation_id, provider, model }
-      text = data.reply || data.response || data.text || data.message || data.content || '';
-      conversationId = data.conversation_id || data.conversationId || null;
-    } else {
-      // Plain text fallback
-      text = await resp.text();
-    }
-    if(conversationId) State.freeConversationId = conversationId;
-    return { text: WordFilter.clean(text), conversationId };
-  },
-
-  // Parse tool-call blocks from model text response.
-  // Handles both complete (```tool...```) and TRUNCATED (```tool... without closing ```)
-  // blocks, since the API may cut off long responses mid-tool-call.
-  // Returns { text: "cleaned text without tool blocks", toolCalls: [{name, args}] }
-  parseToolCalls(text){
-    const toolCalls = [];
-    let cleanText = text;
-
-    // 1. Match COMPLETE tool blocks: ```tool\n{json}```
-    const completeRe = /```tool\s*\n([\s\S]*?)```/g;
-    let match;
-    while((match = completeRe.exec(text)) !== null){
-      const parsed = this._tryParseToolJson(match[1].trim());
-      if(parsed) toolCalls.push(parsed);
-    }
-    cleanText = cleanText.replace(/```tool\s*\n[\s\S]*?```/g, '');
-
-    // 2. Match TRUNCATED tool blocks: ```tool\n{json... (no closing ```)
-    // This happens when the API cuts off the response mid-tool-call.
-    // We try to salvage what we can.
-    if(toolCalls.length === 0){
-      const truncMatch = text.match(/```tool\s*\n([\s\S]*)/);
-      if(truncMatch){
-        const parsed = this._salvageTruncatedTool(truncMatch[1]);
-        if(parsed){
-          toolCalls.push(parsed);
-          UI.log('warn', 'Response was truncated — salvaged partial tool call.');
-        }
-      }
-      // remove the truncated block from display text
-      cleanText = cleanText.replace(/```tool\s*\n[\s\S]*/g, '');
-    }
-
-    // 3. Also check for ```json blocks that contain a tool call (some models use json tag)
-    if(toolCalls.length === 0){
-      const jsonRe = /```json\s*\n([\s\S]*?)```/g;
-      while((match = jsonRe.exec(text)) !== null){
-        const parsed = this._tryParseToolJson(match[1].trim());
-        if(parsed && this._isToolCall(match[1].trim())){
-          toolCalls.push(parsed);
-        }
-      }
-      cleanText = cleanText.replace(/```json\s*\n[\s\S]*?```/g, '');
-    }
-
-    cleanText = cleanText.trim();
-    return { text: cleanText, toolCalls };
-  },
-
-  // Try to parse complete JSON as a tool call
-  _tryParseToolJson(jsonStr){
-    try{
-      const parsed = JSON.parse(jsonStr);
-      if(parsed && parsed.name){
-        return { name: parsed.name, args: parsed.args || {} };
-      }
-    }catch(e){}
-    return null;
-  },
-
-  // Check if a JSON string looks like a tool call (has "name" and "args")
-  _isToolCall(jsonStr){
-    return /"name"\s*:/.test(jsonStr) && /"args"\s*:/.test(jsonStr);
-  },
-
-  // Salvage a truncated tool call. The JSON is incomplete, so we try to:
-  // 1. Extract the tool name and path (usually at the start)
-  // 2. Extract whatever content we can (may be cut off mid-string)
-  _salvageTruncatedTool(raw){
-    // Try strict JSON parse first (maybe it's actually complete but just missing the closing fence)
-    const strict = this._tryParseToolJson(raw.trim());
-    if(strict) return strict;
-
-    // Try to find and fix common truncation: the content string is cut off
-    // Look for the pattern: "content": "...(cut off here)
-    const nameMatch = raw.match(/"name"\s*:\s*"([^"]+)"/);
-    if(!nameMatch) return null;
-    const toolName = nameMatch[1];
-
-    // Extract args — try to get path at minimum
-    const pathMatch = raw.match(/"path"\s*:\s*"([^"]*)"/);
-    const path = pathMatch ? pathMatch[1] : 'unknown.txt';
-
-    // Try to extract content — it may be truncated mid-string
-    let content = '';
-    const contentMatch = raw.match(/"content"\s*:\s*"([\s\S]*?)(?:"|$)/);
-    if(contentMatch){
-      // The content was cut off — take what we have and unescape it
-      content = contentMatch[1]
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\"/g, '"')
-        .replace(/\\\\/g, '\\');
-      UI.log('warn', 'File content was truncated. Partial content recovered (' + content.length + ' chars).');
-    }
-
-    if(toolName === 'write_file'){
-      return { name: 'write_file', args: { path, content } };
-    } else if(toolName === 'task_complete'){
-      const msgMatch = raw.match(/"message"\s*:\s*"([^"]*)"/);
-      return { name: 'task_complete', args: { message: msgMatch ? msgMatch[1] : 'Task complete (truncated)' } };
-    } else if(toolName === 'read_file' || toolName === 'list_files' || toolName === 'render_preview' || toolName === 'execute_js'){
-      // these have simpler args, try to parse them
-      const argsMatch = raw.match(/"args"\s*:\s*(\{[\s\S]*?)(?:\}|$)/);
-      let args = {};
-      if(argsMatch){
-        try{
-          args = JSON.parse(argsMatch[1] + '}');
-        }catch(e){
-          if(pathMatch) args = { path };
-        }
-      }
-      return { name: toolName, args };
-    }
-
-    return null;
-  },
-
-  // Build a conversation prompt from message history for the free tier API
-  // (since the API uses conversation_id for memory, we only send the latest user/tool message)
-  buildPrompt(userInput, isToolResult){
-    if(isToolResult){
-      return 'TOOL RESULT:\n' + userInput;
-    }
-    return userInput;
-  },
-
-  newConversation(){
-    State.freeConversationId = 'vecode_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-  }
-};
 
 /* ---------------- 6. TOOL DEFINITIONS & EXECUTION ---------------- */
 const TOOL_SCHEMAS = [
@@ -1142,14 +924,6 @@ const Agent = {
       return;
     }
     if(State.isRunning) return;
-    if(State.settings.provider === 'free'){
-      return this.runFree(userInput);
-    }
-    return this.runBYOK(userInput);
-  },
-
-  /* ---- BYOK path (OpenAI-compatible with native tool_calls + streaming) ---- */
-  async runBYOK(userInput){
     State.isRunning = true; UI.setRunning(true);
     State.messages.push({role:'user', content: userInput});
     UI.addMessage('user', userInput);
@@ -1200,110 +974,7 @@ const Agent = {
     }
   },
 
-  /* ---- Free tier path (Pro AI API with simulated tool calling) ---- */
-  // The Pro AI API does NOT support streaming, so we show a "thinking" indicator
-  // while waiting for the full response, then display it all at once.
-  async runFree(userInput){
-    State.isRunning = true; UI.setRunning(true);
-    UI.addMessage('user', userInput);
-    State.abortController = new AbortController();
 
-    // start a fresh conversation if we don't have one (or chat was cleared)
-    if(!State.freeConversationId){
-      ProAIClient.newConversation();
-    }
-
-    // build the system prompt: default + free-tier tool format suffix
-    const systemPrompt = (State.settings.systemPrompt || DEFAULT_SYSTEM_PROMPT) + FREE_TIER_SUFFIX;
-
-    // the first prompt is the user's input
-    let currentPrompt = userInput;
-    let iteration = 0;
-
-    try{
-      while(iteration < State.maxIterations){
-        iteration++;
-        UI.log('agent', `--- free tier iteration ${iteration} ---`);
-
-        // show a thinking indicator while we wait (no streaming available)
-        const msgEl = UI.addMessage('assistant', '');
-        UI.updateMessageContent(msgEl, 'Thinking…', true);
-
-        // call the API (full response, not streamed)
-        UI.log('info', 'Contacting free tier API…');
-        let response;
-        try{
-          response = await ProAIClient.chat(currentPrompt, systemPrompt, State.abortController.signal);
-        }catch(e){
-          if(e.name === 'AbortError') throw e;
-          UI.updateMessageContent(msgEl, '❌ Free tier error: ' + e.message, false);
-          UI.log('error', e.message);
-          break;
-        }
-
-        let responseText = response.text;
-        UI.log('success', '✓ Response received (' + responseText.length + ' chars)');
-
-        // parse tool calls from the response
-        const { text: cleanText, toolCalls } = ProAIClient.parseToolCalls(responseText);
-
-        // display the assistant message (clean text only, no tool blocks)
-        if(cleanText){
-          UI.updateMessageContent(msgEl, cleanText, false);
-          UI.renderMarkdown(msgEl);
-        } else {
-          // no visible text — just tool calls. Remove the "Thinking…" message.
-          msgEl.remove();
-        }
-
-        // no tool calls = the model is done (plain text response)
-        if(toolCalls.length === 0){
-          break;
-        }
-
-        // show tool call info on the message (if we kept it)
-        if(cleanText && msgEl.querySelector('.content')){
-          msgEl.querySelector('.content').innerHTML += '<div class="tool-call-info">Calling: ' + toolCalls.map(tc=>`<span class="fn-name">${tc.name}</span>`).join(', ') + '</div>';
-        } else {
-          UI.log('agent', 'Calling: ' + toolCalls.map(tc=>tc.name).join(', '));
-        }
-
-        // execute the first tool call (one at a time for free tier)
-        const tc = toolCalls[0];
-        UI.log('agent', `Tool: ${tc.name}(${JSON.stringify(tc.args).slice(0,200)})`);
-
-        const result = await Tools.execute(tc.name, tc.args);
-        const resultStr = typeof result === 'object' ? JSON.stringify(result) : String(result);
-        const displayResult = resultStr.length > 800 ? resultStr.slice(0,800)+'\n... (truncated)' : resultStr;
-        UI.addMessage('tool', `tool: ${tc.name}\nargs: ${JSON.stringify(tc.args).slice(0,300)}\nresult: ${displayResult}`);
-
-        // check for task_complete
-        if(result && result.__task_complete){
-          UI.log('success', 'Task complete!');
-          break;
-        }
-
-        // feed the tool result back as the next prompt
-        // if the file content was truncated (salvaged), tell the model to rewrite it
-        if(tc.name === 'write_file' && tc.args.content && tc.args.content.length < 100 && userInput.toLowerCase().includes('website')){
-          // likely truncated — ask the model to write the full file in smaller chunks
-          currentPrompt = 'TOOL RESULT: File was written but may be incomplete (response was truncated). The file ' + tc.args.path + ' has ' + tc.args.content.length + ' bytes. If this is incomplete, call write_file again with the FULL content. Keep it under 2500 characters to avoid truncation. Do NOT write long explanations — just the tool call.';
-        } else {
-          currentPrompt = 'TOOL RESULT for ' + tc.name + ':\n' + resultStr + '\n\nContinue with the next step or call task_complete if done. Remember: keep tool calls small (under 2500 chars of content) and do NOT write long explanations.';
-        }
-      }
-
-      if(iteration >= State.maxIterations){
-        UI.log('warn', `Max iterations reached.`);
-        UI.addMessage('system', '⚠ Max iterations. Try a more specific prompt.');
-      }
-    }catch(e){
-      if(e.name === 'AbortError'){ UI.log('warn', 'Stopped by user.'); UI.addMessage('system', '⏹ Generation stopped.'); }
-      else { UI.log('error', 'Agent error: '+e.message); UI.addMessage('system', '❌ Error: '+e.message); }
-    }finally{
-      State.isRunning = false; UI.setRunning(false); State.abortController = null;
-    }
-  },
 
   stop(){
     if(State.abortController){
@@ -1473,7 +1144,6 @@ const UI = {
     document.getElementById('setTemp').value = State.settings.temperature ?? 0.2;
     this.updateApiStatus();
     this.updateThemeSelection();
-    this.updateProviderUI();
     document.getElementById('modalOverlay').classList.add('active');
   },
   closeSettings(){ document.getElementById('modalOverlay').classList.remove('active'); },
@@ -1489,40 +1159,14 @@ const UI = {
     this.closeSettings(); this.setRunning(false);
     this.log('success', 'Settings saved.');
   },
-  updateProviderUI(){
-    const provider = State.settings.provider || 'free';
-    document.querySelectorAll('.provider-btn').forEach(b=>b.classList.toggle('active', b.dataset.provider === provider));
-    const byokFields = document.getElementById('byokFields');
-    const freeInfo = document.getElementById('freeTierInfo');
-    const sshCredit = document.querySelector('.ssh-credit');
-    if(provider === 'free'){
-      byokFields.classList.add('disabled');
-      freeInfo.style.display = '';
-      if(sshCredit) sshCredit.style.display = '';
-    } else {
-      byokFields.classList.remove('disabled');
-      freeInfo.style.display = 'none';
-      if(sshCredit) sshCredit.style.display = 'none';
-    }
-  },
   updateApiStatus(){
     const el = document.getElementById('apiStatus');
-    if(State.settings.provider === 'free'){
-      el.className = 'status-ok';
-      el.textContent = '✓ Free tier active — no key needed';
-      return;
-    }
     if(State.settings.apiKey){ el.className = 'status-ok'; el.textContent = '✓ API key set (' + State.settings.apiKey.slice(0,4) + '...' + State.settings.apiKey.slice(-4) + ')'; }
     else { el.className = 'status-err'; el.textContent = '⚠ No API key configured'; }
   },
   updateModelPill(){
     const pill = document.getElementById('modelPill');
     const dot = document.getElementById('connDot');
-    if(State.settings.provider === 'free'){
-      pill.textContent = 'Free · DeepSeek V4';
-      dot.classList.remove('off');
-      return;
-    }
     if(Settings.isConfigured()){ pill.textContent = State.settings.model; dot.classList.remove('off'); }
     else { pill.textContent = 'No model configured'; dot.classList.add('off'); }
   },
@@ -1723,11 +1367,7 @@ function init(){
   UI.updateModelPill(); UI.updateApiStatus();
   UI.renderFileTree(); UI.renderCodeView(null); UI.renderPreview(); UI.setRunning(false);
   UI.log('info', 'Vecode initialized — AI coding agent in your browser.');
-  if(State.settings.provider === 'free'){
-    UI.log('info', 'Free tier active (DeepSeek V4). No API key needed — just start typing.');
-  } else {
-    UI.log('info', 'Click Settings to configure your API key (BYOK), or Help for a guide.');
-  }
+  UI.log('info', 'Click Settings to configure your API key, or Help for a guide.');
   if(!Settings.isConfigured()) setTimeout(()=>UI.openSettings(), 500);
 
   const input=document.getElementById('chatInput');
@@ -1744,7 +1384,7 @@ function init(){
   input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
   input.addEventListener('input', ()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px'; });
 
-  document.getElementById('clearBtn').addEventListener('click', ()=>{ if(State.isRunning) return; UI.clearChat(); State.messages=[]; State.freeConversationId=null; UI.log('info','Chat cleared.'); });
+  document.getElementById('clearBtn').addEventListener('click', ()=>{ if(State.isRunning) return; UI.clearChat(); State.messages=[]; UI.log('info','Chat cleared.'); });
 
   // modals
   document.getElementById('settingsBtn').addEventListener('click', ()=>UI.openSettings());
@@ -1774,18 +1414,6 @@ function init(){
     });
   });
 
-  // provider toggle
-  document.querySelectorAll('.provider-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const provider = btn.dataset.provider;
-      State.settings.provider = provider;
-      UI.updateProviderUI();
-      UI.updateApiStatus();
-      UI.updateModelPill();
-      Settings.save();
-    });
-  });
-
   // preview
   document.getElementById('refreshPreview').addEventListener('click', ()=>{ UI.renderPreview(); UI.log('info','Preview refreshed.'); });
   document.getElementById('openTab').addEventListener('click', ()=>UI.openPreviewTab());
@@ -1795,7 +1423,7 @@ function init(){
   document.getElementById('newProjectBtn').addEventListener('click', ()=>{
     if(State.isRunning) return;
     if(Object.keys(State.vfs).length>0 && !confirm('Clear all files and start a new project?')) return;
-    VFS.clear(); UI.clearChat(); State.messages=[]; State.freeConversationId=null; UI.clearConsole();
+    VFS.clear(); UI.clearChat(); State.messages=[]; UI.clearConsole();
     UI.log('info', 'New project started.');
   });
 
