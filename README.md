@@ -14,7 +14,7 @@ You can try Vecode today by two methods:
 1: Locally run the HTML file on your device
 2: go to https://vecode.netlify.app
 
-### MiMo V2.5 (OpenCode) vs MiMo V2.5 (Vecode)
+### Features
 
 
 reccomended APIs: https://github.com/YoannDev90/awesome-free-ai-api
