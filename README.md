@@ -21,6 +21,6 @@ You can try Vecode today by two methods:
 - import files by just dragging and dropping
 - simple and easy to understand UI.
 - Export and import data via codes.
-
+- Easy to fork and edit
 
 reccomended APIs: https://github.com/YoannDev90/awesome-free-ai-api
