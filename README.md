@@ -18,10 +18,12 @@ You can try Vecode today by two methods:
 ### MiMo on OpenCode vs. MiMo on Vecode: Web design. Prompt: generate a website about a fictional ai model named nova.
 - Vecode: https://vecode-nova.netlify.app/
 - OpenCode: https://opencode-nova.netlify.app/
+- winner: Vecode
 
 ### MiMo on OpenCode vs. MiMo on Vecode: Typing speed test. Prompt: Create a typing speed test
 - Vecode: https://vecode-typing-test.netlify.app/
 - OpenCode: https://opencode-typing-test.netlify.app/
+- winner: Vecode
 
 ### Features
 - self improvment with self learning skills
