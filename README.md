@@ -19,6 +19,10 @@ You can try Vecode today by two methods:
 - Vecode: https://vecode-nova.netlify.app/
 - OpenCode: https://opencode-nova.netlify.app/
 
+### MiMo on OpenCode vs. MiMo on Vecode: Typing speed test. Prompt: Create a typing speed test
+- Vecode: https://vecode-typing-test.netlify.app/
+- OpenCode: https://opencode-typing-test.netlify.app/
+
 ### Features
 - self improvment with self learning skills
 - tools (coming soon) for agentic work
