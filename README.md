@@ -15,6 +15,10 @@ You can try Vecode today by two methods:
 1: Locally run the HTML file on your device
 2: go to https://vecode.netlify.app
 
+### MiMo on OpenCode vs. MiMo on Vecode: Web design. Prompt: generate a website about a fictional ai model named nova.
+- Vecode: https://vecode-nova.netlify.app/#benchmarks
+- OpenCode: https://opencode-nova.netlify.app/
+
 ### Features
 - self improvment with self learning skills
 - tools (coming soon) for agentic work
