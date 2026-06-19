@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<title>Vecode — AI Coding Agent in Your Browser</title>
+<style>
+/* ============================================================
+   VECODE — Easy-to-use AI coding agent inside your browser
+   Design system: 4 themes · CSS custom properties · mobile-first
+   ============================================================ */
+
+/* ---------- Theme: Carbon (default dark) ---------- */
+:root,[data-theme="carbon"]{
+  --bg:#0d1117; --bg2:#161b22; --bg3:#21262d; --bg4:#30363d;
+  --border:#30363d; --border2:#484f58;
+  --text:#e6edf3; --text2:#8b949e; --text3:#6e7681;
+  --accent:#2f81f7; --accent2:#1f6feb; --accent-soft:rgba(47,129,247,0.12);
+  --green:#3fb950; --red:#f85149; --yellow:#d29922; --purple:#bc8cff; --orange:#db6d28; --cyan:#39c5cf;
+  --mono:'SF Mono','Monaco','Cascadia Code','Consolas','Courier New',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  --radius:8px; --radius-sm:6px; --topbar-h:48px; --tabbar-h:0px;
+  --shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* ---------- Theme: Slate (light) ---------- */
+[data-theme="slate"]{
+  --bg:#f6f8fa; --bg2:#ffffff; --bg3:#eaeef2; --bg4:#d0d7de;
+  --border:#d0d7de; --border2:#afb8c1;
+  --text:#1f2328; --text2:#656d76; --text3:#818b98;
+  --accent:#0969de; --accent2:#0550ae; --accent-soft:rgba(9,105,222,0.08);
+  --green:#1a7f37; --red:#cf222e; --yellow:#9a6700; --purple:#8250df; --orange:#bc4c00; --cyan:#1b7c83;
+  --shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* ---------- Theme: Solarized ---------- */
+[data-theme="solarized"]{
+  --bg:#002b36; --bg2:#073642; --bg3:#0d4350; --bg4:#14505f;
+  --border:#0d4350; --border2:#1a5663;
+  --text:#fdf6e3; --text2:#93a1a1; --text3:#586e75;
+  --accent:#268bd2; --accent2:#1e6fa8; --accent-soft:rgba(38,139,210,0.15);
+  --green:#859900; --red:#dc322f; --yellow:#b58900; --purple:#6c71c4; --orange:#cb4b16; --cyan:#2aa198;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: Tokyo Night ---------- */
+[data-theme="tokyo"]{
+  --bg:#1a1b26; --bg2:#16161e; --bg3:#2a2b37; --bg4:#363b54;
+  --border:#2a2b37; --border2:#3b4261;
+  --text:#c0caf5; --text2:#a9b1d6; --text3:#565f89;
+  --accent:#7aa2f7; --accent2:#5a78d4; --accent-soft:rgba(122,162,247,0.12);
+  --green:#9ece6a; --red:#f7768e; --yellow:#e0af68; --purple:#bb9af7; --orange:#ff9e64; --cyan:#7dcfff;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: Dracula ---------- */
+[data-theme="dracula"]{
+  --bg:#282a36; --bg2:#21222c; --bg3:#383a4a; --bg4:#44475a;
+  --border:#383a4a; --border2:#565b72;
+  --text:#f8f8f2; --text2:#b8bcc8; --text3:#6272a4;
+  --accent:#bd93f9; --accent2:#9a78d4; --accent-soft:rgba(189,147,249,0.12);
+  --green:#50fa7b; --red:#ff5555; --yellow:#f1fa8c; --purple:#bd93f9; --orange:#ffb86c; --cyan:#8be9fd;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: Gruvbox ---------- */
+[data-theme="gruvbox"]{
+  --bg:#282828; --bg2:#1d2021; --bg3:#3c3836; --bg4:#504945;
+  --border:#3c3836; --border2:#665c54;
+  --text:#ebdbb2; --text2:#a89984; --text3:#928374;
+  --accent:#fabd2f; --accent2:#d79921; --accent-soft:rgba(250,189,47,0.12);
+  --green:#b8bb26; --red:#fb4934; --yellow:#fabd2f; --purple:#d3869b; --orange:#fe8019; --cyan:#8ec07c;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: Nord ---------- */
+[data-theme="nord"]{
+  --bg:#2e3440; --bg2:#272c36; --bg3:#3b4252; --bg4:#434c5e;
+  --border:#3b4252; --border2:#4c566a;
+  --text:#e5e9f0; --text2:#aeb4c0; --text3:#616e88;
+  --accent:#88c0d0; --accent2:#6a9fb4; --accent-soft:rgba(136,192,208,0.12);
+  --green:#a3be8c; --red:#bf616a; --yellow:#ebcb8b; --purple:#b48ead; --orange:#d08770; --cyan:#8fbcbb;
+  --shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* ---------- Theme: Rosé Pine ---------- */
+[data-theme="rosepine"]{
+  --bg:#191724; --bg2:#1f1d2e; --bg3:#26233a; --bg4:#2e2a47;
+  --border:#26233a; --border2:#403d5a;
+  --text:#e0def4; --text2:#908caa; --text3:#6e6a86;
+  --accent:#c4a7e7; --accent2:#a28bd5; --accent-soft:rgba(196,167,231,0.12);
+  --green:#31748f; --red:#eb6f92; --yellow:#f6c177; --purple:#c4a7e7; --orange:#ebbcba; --cyan:#9ccfd8;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: One Dark ---------- */
+[data-theme="onedark"]{
+  --bg:#282c34; --bg2:#21252b; --bg3:#2c313a; --bg4:#3b4048;
+  --border:#2c313a; --border2:#4b5263;
+  --text:#abb2bf; --text2:#7f848e; --text3:#5c6370;
+  --accent:#61afef; --accent2:#4a9fe8; --accent-soft:rgba(97,175,239,0.12);
+  --green:#98c379; --red:#e06c75; --yellow:#e5c07b; --purple:#c678dd; --orange:#d19a66; --cyan:#56b6c2;
+  --shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* ---------- Theme: Catppuccin Mocha ---------- */
+[data-theme="catppuccin"]{
+  --bg:#1e1e2e; --bg2:#181825; --bg3:#313244; --bg4:#45475a;
+  --border:#313244; --border2:#585b70;
+  --text:#cdd6f4; --text2:#a6adc8; --text3:#6c7086;
+  --accent:#89b4fa; --accent2:#74a0f5; --accent-soft:rgba(137,180,250,0.12);
+  --green:#a6e3a1; --red:#f38ba8; --yellow:#f9e2af; --purple:#cba6f7; --orange:#fab387; --cyan:#89dceb;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ---------- Theme: GitHub Light ---------- */
+[data-theme="github"]{
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#eaeef2; --bg4:#d0d7de;
+  --border:#d0d7de; --border2:#afb8c1;
+  --text:#1f2328; --text2:#656d76; --text3:#818b98;
+  --accent:#0969de; --accent2:#0550ae; --accent-soft:rgba(9,105,222,0.08);
+  --green:#1a7f37; --red:#cf222e; --yellow:#9a6700; --purple:#8250df; --orange:#bc4c00; --cyan:#1b7c83;
+  --shadow:0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* ---------- Theme: Synthwave '84 ---------- */
+[data-theme="synthwave"]{
+  --bg:#241b2f; --bg2:#1a1426; --bg3:#2a2139; --bg4:#34294f;
+  --border:#34294f; --border2:#52527a;
+  --text:#f8f8f2; --text2:#b0a8c9; --text3:#8480a0;
+  --accent:#ff7edb; --accent2:#f652d8; --accent-soft:rgba(255,126,219,0.12);
+  --green:#72f1b8; --red:#fe4450; --yellow:#fede5d; --purple:#c792ea; --orange:#ff8b39; --cyan:#36f9f6;
+  --shadow:0 8px 24px rgba(0,0,0,0.6);
+}
+
+/* ---------- Theme: Ayu Dark ---------- */
+[data-theme="ayu"]{
+  --bg:#0b0e14; --bg2:#0f1419; --bg3:#131721; --bg4:#1c2128;
+  --border:#1c2128; --border2:#2d333b;
+  --text:#bfbdb6; --text2:#7a7a7a; --text3:#565656;
+  --accent:#ffb454; --accent2:#e89e3c; --accent-soft:rgba(255,180,84,0.12);
+  --green:#aad94c; --red:#f07178; --yellow:#ffb454; --purple:#d4bfff; --orange:#ff8f40; --cyan:#59c2ff;
+  --shadow:0 8px 24px rgba(0,0,0,0.5);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:var(--text);transition:background .15s,color .15s,border-color .15s}
+input,textarea,select{font-family:var(--mono);background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;font-size:13px;outline:none;transition:border-color .15s;width:100%}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+textarea{resize:none;line-height:1.5}
+::selection{background:var(--accent-soft)}
+
+/* ===== TOP BAR ===== */
+#topbar{height:var(--topbar-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:20;flex-shrink:0}
+#topbar .logo{font-weight:700;font-size:16px;letter-spacing:-0.4px;display:flex;align-items:center;gap:9px;white-space:nowrap}
+#topbar .logo .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
+#topbar .logo .dot.off{background:var(--text3);box-shadow:none}
+#topbar .tagline{font-size:11px;color:var(--text3);letter-spacing:0.01em;white-space:nowrap}
+#topbar .spacer{flex:1}
+#topbar .model-pill{font-size:11px;color:var(--text2);background:var(--bg3);padding:4px 11px;border-radius:20px;border:1px solid var(--border);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-btn{padding:7px 13px;border-radius:var(--radius-sm);font-size:12px;color:var(--text2);border:1px solid transparent;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tb-btn:hover{background:var(--bg3);color:var(--text)}
+.tb-btn:active{transform:translateY(1px)}
+.tb-btn svg{flex-shrink:0}
+
+/* ===== MAIN GRID ===== */
+#main{display:grid;grid-template-columns:minmax(300px,360px) minmax(280px,1fr) minmax(280px,1fr);height:calc(100vh - var(--topbar-h));gap:1px;background:var(--border)}
+.pane{background:var(--bg);overflow:hidden;display:flex;flex-direction:column;min-width:0;min-height:0}
+.pane-header{height:36px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0}
+.pane-header .title{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);font-weight:600}
+.pane-header .spacer{flex:1}
+.pane-body{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+
+/* ===== LEFT PANE: CHAT ===== */
+#chatLog{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:16px;-webkit-overflow-scrolling:touch}
+.msg{display:flex;flex-direction:column;gap:5px;max-width:100%;animation:msgIn .25s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg .role{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text2);font-weight:600;display:flex;align-items:center;gap:7px}
+.msg .role .badge{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.msg.user .role .badge{background:var(--accent)}
+.msg.assistant .role .badge{background:var(--green)}
+.msg.tool .role .badge{background:var(--yellow)}
+.msg.system .role .badge{background:var(--text3)}
+.msg .content{font-size:13px;line-height:1.65;color:var(--text);word-wrap:break-word;overflow-wrap:break-word}
+.msg.tool .content{font-size:11.5px;color:var(--text2);font-family:var(--mono);background:var(--bg2);padding:9px 11px;border-radius:var(--radius-sm);border:1px solid var(--border);white-space:pre-wrap;overflow-x:auto;max-height:200px;overflow-y:auto}
+.msg .content p{margin:0 0 8px}
+.msg .content p:last-child{margin-bottom:0}
+.msg .content ul,.msg .content ol{margin:0 0 8px;padding-left:20px}
+.msg .content li{margin:2px 0}
+.msg .content code{font-family:var(--mono);font-size:12px;background:var(--bg3);padding:1px 5px;border-radius:4px;color:var(--purple)}
+.msg .content pre{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;overflow-x:auto;margin:8px 0;position:relative}
+.msg .content pre code{background:none;padding:0;color:var(--text);font-size:12px;line-height:1.5}
+.msg .content h1,.msg .content h2,.msg .content h3{font-size:14px;font-weight:700;margin:12px 0 4px}
+.msg .tool-call-info{font-size:11px;color:var(--cyan);font-family:var(--mono);background:rgba(57,197,207,0.08);padding:6px 11px;border-radius:var(--radius-sm);border:1px solid rgba(57,197,207,0.2);margin:5px 0}
+.msg .tool-call-info .fn-name{color:var(--cyan);font-weight:700}
+.msg .stream-cursor::after{content:'▋';color:var(--accent);animation:blink 1s infinite}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.msg .content pre .copy-code{position:absolute;top:7px;right:7px;font-size:10px;color:var(--text3);background:var(--bg3);padding:3px 9px;border-radius:4px;cursor:pointer;opacity:0;transition:opacity .15s}
+.msg .content pre:hover .copy-code{opacity:1}
+.msg .content pre .copy-code:hover{color:var(--accent)}
+.msg .content blockquote{border-left:3px solid var(--accent);padding-left:12px;margin:8px 0;color:var(--text2);font-style:italic}
+.msg .content hr{border:none;border-top:1px solid var(--border);margin:12px 0}
+.msg .content table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.msg .content th,.msg .content td{padding:6px 10px;border:1px solid var(--border);text-align:left}
+.msg .content th{background:var(--bg2);font-weight:600}
+.msg .content a{color:var(--accent);text-decoration:none}
+.msg .content a:hover{text-decoration:underline}
+
+#inputArea{border-top:1px solid var(--border);padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--bg2);flex-shrink:0}
+#chatInput{width:100%;min-height:56px;max-height:120px;resize:vertical;font-size:13px;line-height:1.5;flex:1}
+#inputControls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#sendBtn{background:var(--accent);color:#fff;padding:8px 20px;border-radius:var(--radius-sm);font-weight:600;font-size:13px;flex-shrink:0}
+#sendBtn:hover{background:var(--accent2)}
+#sendBtn:disabled{background:var(--bg4);color:var(--text3);cursor:not-allowed}
+#stopBtn{background:var(--red);color:#fff;padding:8px 16px;border-radius:var(--radius-sm);font-weight:600;font-size:13px;display:none;flex-shrink:0}
+#stopBtn:hover{opacity:0.85}
+#clearBtn{font-size:12px;color:var(--text2);padding:6px 11px;flex-shrink:0}
+#clearBtn:hover{color:var(--text)}
+.input-hint{font-size:10px;color:var(--text3);margin-left:auto}
+
+/* ===== MIDDLE PANE: VFS + CODE ===== */
+#fileTree{padding:6px 0;overflow-y:auto;max-height:42%;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch}
+.tree-item{padding:4px 14px;font-size:12px;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--text2);white-space:nowrap}
+.tree-item:hover{background:var(--bg2);color:var(--text)}
+.tree-item.active{background:var(--accent-soft);color:var(--accent)}
+.tree-item .icon{font-size:13px;width:14px;text-align:center;flex-shrink:0}
+.tree-item .ico-html{color:var(--red)} .tree-item .ico-css{color:var(--purple)} .tree-item .ico-js{color:var(--yellow)} .tree-item .ico-json{color:var(--green)} .tree-item .ico-md{color:var(--text2)} .tree-item .ico-default{color:var(--text2)}
+.tree-item .del{margin-left:auto;opacity:0;color:var(--red);font-size:15px;padding:0 4px;flex-shrink:0}
+.tree-item:hover .del{opacity:0.5}
+.tree-item .del:hover{opacity:1}
+.file-actions{display:flex;gap:4px;padding:6px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.fa-btn{font-size:10px;color:var(--text2);padding:4px 9px;border-radius:4px;border:1px solid var(--border)}
+.fa-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+#codeView{flex:1;overflow:auto;min-height:0;position:relative;-webkit-overflow-scrolling:touch}
+#codeContent{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.65;white-space:pre;tab-size:2;min-height:100%}
+#codeEmpty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:13px;text-align:center;padding:20px}
+.code-meta{padding:5px 14px;font-size:10px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.tk-kw{color:var(--purple)} .tk-str{color:var(--green)} .tk-num{color:var(--orange)} .tk-cmt{color:var(--text3);font-style:italic} .tk-fn{color:var(--accent)} .tk-tag{color:var(--red)} .tk-attr{color:var(--yellow)} .tk-prop{color:var(--cyan)}
+
+/* ===== RIGHT PANE: PREVIEW + CONSOLE ===== */
+#previewWrap{flex:1;display:flex;flex-direction:column;min-height:0;border-bottom:1px solid var(--border)}
+#previewFrame{flex:1;border:none;background:#fff;min-height:0;display:block;width:100%}
+#previewEmpty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);font-size:13px;gap:10px;background:var(--bg);text-align:center;padding:20px}
+#previewEmpty .big{font-size:32px;opacity:0.25}
+#previewToolbar{height:32px;background:var(--bg2);display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0}
+#previewToolbar .url{font-size:11px;color:var(--text3);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#refreshPreview,#openTab{font-size:11px;color:var(--text2);padding:4px 9px;border-radius:4px;flex-shrink:0}
+#refreshPreview:hover,#openTab:hover{background:var(--bg3);color:var(--text)}
+#consoleWrap{height:36%;display:flex;flex-direction:column;min-height:0}
+#consoleLog{flex:1;overflow-y:auto;padding:9px 14px;font-family:var(--mono);font-size:11px;line-height:1.7;-webkit-overflow-scrolling:touch}
+.log-line{padding:1px 0;white-space:pre-wrap;word-break:break-word}
+.log-line.info{color:var(--text2)}
+.log-line.log{color:var(--text)}
+.log-line.warn{color:var(--yellow)}
+.log-line.error{color:var(--red)}
+.log-line.agent{color:var(--cyan)}
+.log-line.success{color:var(--green)}
+.log-line .ts{color:var(--text3);font-size:10px}
+#consoleClear{font-size:11px;color:var(--text2);padding:4px 9px;border-radius:4px;flex-shrink:0}
+#consoleClear:hover{background:var(--bg3);color:var(--text)}
+
+/* ===== MODALS (shared) ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:16px}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);width:560px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
+.modal-header h2{font-size:16px;font-weight:700;letter-spacing:-0.2px}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:18px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--bg2)}
+.close-btn{font-size:22px;color:var(--text2);padding:2px 8px;line-height:1}
+.close-btn:hover{color:var(--text)}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em}
+.field .desc{font-size:11px;color:var(--text3);line-height:1.5}
+.field .preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.preset-chip{font-size:11px;padding:5px 11px;border:1px solid var(--border);border-radius:16px;color:var(--text2);cursor:pointer;transition:.15s;user-select:none}
+.preset-chip:hover{border-color:var(--accent);color:var(--accent)}
+.preset-chip.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.api-key-row{position:relative;display:flex;align-items:center}
+.api-key-row input{padding-right:42px !important}
+.api-key-row .toggle-vis{position:absolute;right:8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:10px;color:var(--text2);cursor:pointer}
+.api-key-row .toggle-vis:hover{color:var(--accent);border-color:var(--accent)}
+.help-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:14px;flex-wrap:wrap}
+.help-tab{font-size:12px;padding:8px 14px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500}
+.help-tab:hover{color:var(--text)}
+.help-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.help-section{display:none}
+.help-section.active{display:block}
+.help-section .ext-link{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;background:var(--accent-soft);border:1px solid rgba(47,129,247,0.3);border-radius:var(--radius-sm);color:var(--accent);font-size:12px;font-weight:600;margin:8px 0;text-decoration:none}
+.help-section .ext-link:hover{background:rgba(47,129,247,0.18)}
+.provider-table .free{color:var(--green);font-weight:600;font-size:10px}
+.provider-table .paid{color:var(--text3);font-size:10px}
+.chat-empty-hero{text-align:center;padding:30px 16px 16px;color:var(--text3)}
+.chat-empty-hero .big{font-size:18px;color:var(--text);font-weight:600;margin-bottom:6px}
+.chat-empty-hero .sub{font-size:12px;line-height:1.6;margin-bottom:14px}
+.chat-empty-hero .prompt-chip{display:inline-block;font-size:11px;padding:5px 11px;border:1px solid var(--border);border-radius:16px;color:var(--text2);margin:3px;cursor:pointer;transition:.15s;background:var(--bg2)}
+.chat-empty-hero .prompt-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+/* ===== SKILLS MANAGER ===== */
+.skills-list{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;padding:2px}
+.skill-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;display:flex;flex-direction:column;gap:4px}
+.skill-item .si-head{display:flex;align-items:center;gap:8px}
+.skill-item .si-name{font-weight:600;font-size:12px;color:var(--text)}
+.skill-item .si-badge{font-size:9px;padding:2px 7px;border-radius:10px;background:var(--accent-soft);color:var(--accent);text-transform:uppercase;letter-spacing:0.04em}
+.skill-item .si-desc{font-size:11px;color:var(--text2);line-height:1.5}
+.skill-item .si-actions{display:flex;gap:6px;margin-top:4px}
+.skill-item .si-btn{font-size:10px;padding:3px 9px;border-radius:4px;border:1px solid var(--border);color:var(--text2);cursor:pointer}
+.skill-item .si-btn:hover{border-color:var(--accent);color:var(--accent)}
+.skill-item .si-btn.danger:hover{border-color:var(--red);color:var(--red)}
+.skills-empty{padding:16px;text-align:center;color:var(--text3);font-size:11px;font-style:italic}
+.skills-add-row{display:flex;gap:6px;margin-top:8px}
+.skills-add-row input{flex:1;font-size:11px;padding:6px 9px}
+.skills-add-row button{font-size:11px;padding:6px 12px;background:var(--accent);color:#fff;border-radius:var(--radius-sm);border:none;cursor:pointer;white-space:nowrap}
+.skills-add-row button:hover{background:var(--accent2)}
+/* ===== CONFIG CODE MODAL ===== */
+.config-code-area{width:100%;min-height:140px;max-height:240px;font-family:var(--mono);font-size:10px;line-height:1.5;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);resize:vertical;word-break:break-all;white-space:pre-wrap}
+.config-options{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.config-opt{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);cursor:pointer;padding:4px 0}
+.config-opt input{width:auto;cursor:pointer}
+.config-warn{background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:var(--radius-sm);padding:9px 12px;font-size:11px;color:var(--red);line-height:1.5;margin:8px 0}
+.config-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.config-actions button{font-size:12px;padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer}
+.config-actions button:hover{background:var(--bg4);border-color:var(--border2)}
+.config-actions button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.config-actions button.primary:hover{background:var(--accent2)}
+.config-stats{font-size:11px;color:var(--text3);margin-top:6px;font-family:var(--mono)}
+/* ===== DRAG DROP OVERLAY ===== */
+#dropOverlay{position:fixed;inset:0;background:rgba(47,129,247,0.15);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:200;pointer-events:none}
+#dropOverlay.active{display:flex}
+#dropOverlay .drop-msg{background:var(--bg2);border:2px dashed var(--accent);border-radius:var(--radius);padding:32px 48px;font-size:16px;color:var(--accent);font-weight:600}
+/* ===== EXPORT MENU NEW ITEMS ===== */
+.export-item.accent .ei-title{color:var(--accent)}
+.export-item.warn .ei-title{color:var(--yellow)}
+.save-btn{background:var(--accent);color:#fff;padding:9px 22px;border-radius:var(--radius-sm);font-weight:600;font-size:13px}
+.save-btn:hover{background:var(--accent2)}
+.cancel-btn{background:var(--bg3);color:var(--text);padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;border:1px solid var(--border)}
+.cancel-btn:hover{background:var(--bg4)}
+#apiStatus{font-size:11px;padding:4px 0}
+.status-ok{color:var(--green)} .status-err{color:var(--red)} .status-na{color:var(--text3)}
+
+/* ===== THEME SELECTOR ===== */
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.theme-card{cursor:pointer;border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:.15s}
+.theme-card:hover{border-color:var(--border2)}
+.theme-card.active{border-color:var(--accent)}
+.theme-card .swatches{display:flex;gap:3px}
+.theme-card .swatch{width:14px;height:14px;border-radius:50%}
+.theme-card .tn{font-size:10px;color:var(--text2);text-align:center}
+
+/* ===== EXPORT DROPDOWN ===== */
+.export-menu{position:fixed;top:var(--topbar-h);right:16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);display:none;flex-direction:column;min-width:240px;z-index:50;overflow:hidden}
+.export-menu.active{display:flex}
+.export-item{padding:11px 15px;font-size:12px;color:var(--text2);cursor:pointer;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--border);transition:.12s}
+.export-item:last-child{border-bottom:none}
+.export-item:hover{background:var(--bg3)}
+.export-item .ei-title{font-weight:600;color:var(--text)}
+.export-item:hover .ei-title{color:var(--accent)}
+.export-item .ei-desc{font-size:10px;color:var(--text3)}
+
+/* ===== HELP MODAL ===== */
+#helpModal{width:660px;max-width:100%}
+.help-section h3{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:0.01em}
+.help-section p{font-size:12px;line-height:1.7;color:var(--text2);margin-bottom:6px}
+.help-section p strong{color:var(--text)}
+.help-section ol,.help-section ul{font-size:12px;line-height:1.85;color:var(--text2);padding-left:18px;margin:6px 0}
+.help-section li{margin:3px 0}
+.help-section code{font-family:var(--mono);font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px;color:var(--purple)}
+.help-section .kbd{font-family:var(--mono);font-size:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;color:var(--text)}
+.help-section .callout{background:var(--accent-soft);border:1px solid rgba(47,129,247,0.25);border-radius:var(--radius-sm);padding:11px 13px;font-size:11px;line-height:1.65;color:var(--text2)}
+.help-section .callout strong{color:var(--text)}
+.provider-table{width:100%;font-size:11px;border-collapse:collapse;margin:6px 0}
+.provider-table th,.provider-table td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:left}
+.provider-table th{color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.04em}
+.provider-table td{color:var(--text)}
+.provider-table td code{font-size:10px}
+
+/* ===== MOBILE TAB BAR ===== */
+#tabbar{display:none;position:fixed;bottom:0;left:0;right:0;height:52px;background:var(--bg2);border-top:1px solid var(--border);z-index:30;justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom)}
+.tab-btn{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;color:var(--text3);padding:6px 16px;flex:1}
+.tab-btn .tab-ico{font-size:18px}
+.tab-btn.active{color:var(--accent)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1100px){
+  #main{grid-template-columns:minmax(260px,320px) minmax(240px,1fr) minmax(240px,1fr)}
+}
+@media(max-width:860px){
+  :root{--topbar-h:48px;--tabbar-h:52px}
+  #topbar{padding:0 12px;gap:8px}
+  #topbar .tagline{display:none}
+  #topbar .model-pill{max-width:120px;font-size:10px}
+  .tb-btn{padding:6px 9px;font-size:11px}
+  .tb-btn span.lbl{display:none}
+  #main{grid-template-columns:1fr;height:calc(100vh - var(--topbar-h) - var(--tabbar-h))}
+  .pane{display:none}
+  .pane.mobile-active{display:flex}
+  #tabbar{display:flex}
+  #chatPane.mobile-active{display:flex}
+  #codePane.mobile-active{display:flex}
+  #rightPane.mobile-active{display:flex}
+  #chatLog{padding:10px}
+  #inputArea{padding:8px 10px}
+  .modal{max-height:calc(100vh - 32px)}
+  .modal-body{padding:16px}
+  .theme-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+  #topbar .logo{font-size:14px}
+  .tb-btn{padding:6px 8px}
+  #sendBtn{padding:8px 16px}
+}
+</style>
+</head>
+<body data-theme="carbon">
+
+<!-- ===== TOP BAR ===== -->
+<div id="topbar">
+  <div class="logo"><span class="dot" id="connDot"></span>Vecode</div>
+  <span class="tagline">AI coding agent in your browser</span>
+  <span class="model-pill" id="modelPill">No model configured</span>
+  <div class="spacer"></div>
+  <button class="tb-btn" id="exportBtn" title="Export project"><span class="lbl">Export</span></button>
+  <button class="tb-btn" id="helpBtn" title="How to use & BYOK guide"><span class="lbl">Help</span></button>
+  <button class="tb-btn" id="settingsBtn" title="Settings">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 12a4 4 0 110-8 4 4 0 010 8z"/></svg>
+    <span class="lbl">Settings</span>
+  </button>
+  <button class="tb-btn" id="newProjectBtn" title="Clear VFS"><span class="lbl">New</span></button>
+</div>
+
+<!-- ===== EXPORT DROPDOWN ===== -->
+<div class="export-menu" id="exportMenu">
+  <div class="export-item" data-export="zip"><span class="ei-title">Export as .zip</span><span class="ei-desc">Download all files as a zip archive</span></div>
+  <div class="export-item" data-export="single"><span class="ei-title">Export bundled HTML</span><span class="ei-desc">Single self-contained index.html</span></div>
+  <div class="export-item" data-export="json"><span class="ei-title">Export project as JSON</span><span class="ei-desc">Save VFS state for re-import</span></div>
+  <div class="export-item" data-export="file"><span class="ei-title">Download current file</span><span class="ei-desc">Download the selected file</span></div>
+  <div class="export-item" data-export="import"><span class="ei-title">Import project JSON</span><span class="ei-desc">Load a previously exported .json</span></div>
+  <div class="export-item accent" data-export="import-files"><span class="ei-title">Import files from disk</span><span class="ei-desc">Add .html/.css/.js/.txt files to the VFS</span></div>
+  <div class="export-item accent" data-export="config-export"><span class="ei-title">Export config code</span><span class="ei-desc">Base64 string with theme + key + model + files + skills</span></div>
+  <div class="export-item accent" data-export="config-import"><span class="ei-title">Import config code</span><span class="ei-desc">Paste a config code to restore a full setup</span></div>
+</div>
+
+<!-- ===== MAIN LAYOUT ===== -->
+<div id="main">
+  <!-- LEFT: CHAT -->
+  <div class="pane mobile-active" id="chatPane">
+    <div class="pane-header"><span class="title">Chat</span><div class="spacer"></div></div>
+    <div class="pane-body">
+      <div id="chatLog"></div>
+      <div id="inputArea">
+        <textarea id="chatInput" placeholder="Describe what you want to build... (e.g. 'Create a todo app with local storage')"></textarea>
+        <div id="inputControls">
+          <button id="sendBtn">Send</button>
+          <button id="stopBtn">Stop</button>
+          <button id="clearBtn">Clear</button>
+          <span class="input-hint">Enter to send · Shift+Enter newline</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIDDLE: FILES + CODE -->
+  <div class="pane" id="codePane">
+    <div class="pane-header"><span class="title">Files</span><div class="spacer"></div><span id="fileCount" style="font-size:11px;color:var(--text3)">0 files</span></div>
+    <div class="pane-body">
+      <div id="fileTree"></div>
+      <div id="fileActions" class="file-actions" style="display:none">
+        <button class="fa-btn" id="faCopy">Copy</button>
+        <button class="fa-btn" id="faDownload">Download</button>
+        <button class="fa-btn" id="faDelete">Delete</button>
+      </div>
+      <div id="codeView"><div id="codeEmpty">No files yet.<br>Ask Vecode to build something!</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: PREVIEW + CONSOLE -->
+  <div class="pane" id="rightPane">
+    <div class="pane-header"><span class="title">Preview</span><div class="spacer"></div>
+      <button id="refreshPreview">Refresh</button>
+      <button id="openTab">Open ↗</button>
+    </div>
+    <div class="pane-body">
+      <div id="previewWrap">
+        <div id="previewEmpty"><div class="big">▶</div><div>Preview will appear here</div></div>
+        <iframe id="previewFrame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin" style="display:none"></iframe>
+      </div>
+      <div id="consoleWrap">
+        <div class="pane-header" style="border-bottom:none"><span class="title">Console</span><div class="spacer"></div><button id="consoleClear">Clear</button></div>
+        <div id="consoleLog"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MOBILE TAB BAR ===== -->
+<div id="tabbar">
+  <button class="tab-btn active" data-pane="chatPane"><span class="tab-ico">💬</span>Chat</button>
+  <button class="tab-btn" data-pane="codePane"><span class="tab-ico">📁</span>Files</button>
+  <button class="tab-btn" data-pane="rightPane"><span class="tab-ico">▶</span>Preview</button>
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="settingsModal">
+    <div class="modal-header"><h2>Settings</h2><button class="close-btn" id="closeModal">&times;</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Theme</label>
+        <div class="theme-grid" id="themeGrid">
+          <div class="theme-card" data-theme="carbon"><div class="swatches"><span class="swatch" style="background:#0d1117"></span><span class="swatch" style="background:#2f81f7"></span><span class="swatch" style="background:#3fb950"></span></div><div class="tn">Carbon</div></div>
+          <div class="theme-card" data-theme="slate"><div class="swatches"><span class="swatch" style="background:#f6f8fa"></span><span class="swatch" style="background:#0969de"></span><span class="swatch" style="background:#1a7f37"></span></div><div class="tn">Slate</div></div>
+          <div class="theme-card" data-theme="solarized"><div class="swatches"><span class="swatch" style="background:#002b36"></span><span class="swatch" style="background:#268bd2"></span><span class="swatch" style="background:#b58900"></span></div><div class="tn">Solarized</div></div>
+          <div class="theme-card" data-theme="tokyo"><div class="swatches"><span class="swatch" style="background:#1a1b26"></span><span class="swatch" style="background:#7aa2f7"></span><span class="swatch" style="background:#9ece6a"></span></div><div class="tn">Tokyo Night</div></div>
+          <div class="theme-card" data-theme="dracula"><div class="swatches"><span class="swatch" style="background:#282a36"></span><span class="swatch" style="background:#bd93f9"></span><span class="swatch" style="background:#50fa7b"></span></div><div class="tn">Dracula</div></div>
+          <div class="theme-card" data-theme="gruvbox"><div class="swatches"><span class="swatch" style="background:#282828"></span><span class="swatch" style="background:#fabd2f"></span><span class="swatch" style="background:#8ec07c"></span></div><div class="tn">Gruvbox</div></div>
+          <div class="theme-card" data-theme="nord"><div class="swatches"><span class="swatch" style="background:#2e3440"></span><span class="swatch" style="background:#88c0d0"></span><span class="swatch" style="background:#a3be8c"></span></div><div class="tn">Nord</div></div>
+          <div class="theme-card" data-theme="rosepine"><div class="swatches"><span class="swatch" style="background:#191724"></span><span class="swatch" style="background:#c4a7e7"></span><span class="swatch" style="background:#9ccfd8"></span></div><div class="tn">Rosé Pine</div></div>
+          <div class="theme-card" data-theme="onedark"><div class="swatches"><span class="swatch" style="background:#282c34"></span><span class="swatch" style="background:#61afef"></span><span class="swatch" style="background:#98c379"></span></div><div class="tn">One Dark</div></div>
+          <div class="theme-card" data-theme="catppuccin"><div class="swatches"><span class="swatch" style="background:#1e1e2e"></span><span class="swatch" style="background:#89b4fa"></span><span class="swatch" style="background:#a6e3a1"></span></div><div class="tn">Catppuccin</div></div>
+          <div class="theme-card" data-theme="github"><div class="swatches"><span class="swatch" style="background:#ffffff"></span><span class="swatch" style="background:#0969de"></span><span class="swatch" style="background:#1a7f37"></span></div><div class="tn">GitHub Light</div></div>
+          <div class="theme-card" data-theme="synthwave"><div class="swatches"><span class="swatch" style="background:#241b2f"></span><span class="swatch" style="background:#ff7edb"></span><span class="swatch" style="background:#36f9f6"></span></div><div class="tn">Synthwave</div></div>
+          <div class="theme-card" data-theme="ayu"><div class="swatches"><span class="swatch" style="background:#0b0e14"></span><span class="swatch" style="background:#ffb454"></span><span class="swatch" style="background:#59c2ff"></span></div><div class="tn">Ayu Dark</div></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>API Key <span style="text-transform:none;font-weight:400;color:var(--text3);font-size:11px;margin-left:6px">— see Help → “Getting a free API key” if you don't have one</span></label>
+        <div class="api-key-row">
+          <input type="password" id="setApiKey" placeholder="sk-... / sk-or-... / hf_... / gsk_...">
+          <button class="toggle-vis" id="toggleKeyVis" title="Show/hide key">show</button>
+        </div>
+        <div class="desc">Stored only in your browser's localStorage. Sent only to the endpoint you configure — never to any third party.</div>
+        <div id="apiStatus" class="status-na">Not configured</div>
+      </div>
+      <div class="field">
+        <label>Provider / Base Endpoint URL</label>
+        <input type="text" id="setEndpoint" placeholder="https://api.openai.com/v1">
+        <div class="desc">Any OpenAI-compatible endpoint. Click a preset below to auto-fill endpoint + model.</div>
+        <div class="preset-row" id="presetRow">
+          <span class="preset-chip" data-ep="https://api.openai.com/v1" data-model="gpt-4o-mini" data-key-hint="Get a key at platform.openai.com/api-keys">OpenAI</span>
+          <span class="preset-chip" data-ep="https://openrouter.ai/api/v1" data-model="anthropic/claude-3.5-sonnet" data-key-hint="Get a free key at openrouter.ai/keys">OpenRouter</span>
+          <span class="preset-chip" data-ep="https://api.together.xyz/v1" data-model="meta-llama/Llama-3-70b-chat-hf" data-key-hint="Get a free key at api.together.xyz/settings/api-keys">Together AI</span>
+          <span class="preset-chip" data-ep="https://generativelanguage.googleapis.com/v1beta/openai" data-model="gemini-1.5-flash" data-key-hint="Get a free key at aistudio.google.com/apikey">Google Gemini</span>
+          <span class="preset-chip" data-ep="https://api.groq.com/openai/v1" data-model="llama-3.3-70b-versatile" data-key-hint="Get a free key at console.groq.com/keys">Groq (free)</span>
+          <span class="preset-chip" data-ep="https://router.huggingface.co/v1" data-model="meta-llama/Llama-3.3-70B-Instruct" data-key-hint="Get a free key at huggingface.co/settings/tokens">HuggingFace (free)</span>
+          <span class="preset-chip" data-ep="https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1" data-model="@cf/meta/llama-3.1-8b-instruct" data-key-hint="Get a free API token at dash.cloudflare.com → My Profile → API Tokens">Cloudflare AI (free)</span>
+          <span class="preset-chip" data-ep="https://api.deepseek.com/v1" data-model="deepseek-chat" data-key-hint="Get a key at platform.deepseek.com/api_keys">DeepSeek</span>
+          <span class="preset-chip" data-ep="https://api.mistral.ai/v1" data-model="mistral-small-latest" data-key-hint="Get a free key at console.mistral.ai/api-keys">Mistral (free tier)</span>
+          <span class="preset-chip" data-ep="http://localhost:11434/v1" data-model="llama3" data-key-hint="No key needed — install Ollama and run 'ollama serve'">Ollama (local)</span>
+        </div>
+        <div id="presetHint" class="desc" style="margin-top:6px;color:var(--accent);display:none"></div>
+      </div>
+      <div class="field">
+        <label>Model Name</label>
+        <input type="text" id="setModel" placeholder="gpt-4o">
+        <div class="desc">The model ID to use for chat completions.</div>
+      </div>
+      <div class="field">
+        <label>System Prompt</label>
+        <textarea id="setSystemPrompt" placeholder="You are an expert AI coding agent..." style="min-height:100px"></textarea>
+        <div class="desc">Defines the agent's persona and behavior. A robust default is provided.</div>
+      </div>
+      <div class="field">
+        <label>Temperature</label>
+        <input type="range" id="setTemp" min="0" max="1" step="0.1" value="0.2">
+        <div class="desc">Lower = more deterministic. 0.2 recommended for coding.</div>
+      </div>
+      <div class="field">
+        <label>Learned Skills <span style="text-transform:none;font-weight:400;color:var(--text3);font-size:11px;margin-left:6px">— the agent can add new skills via the learn_skill tool, or you can add them manually here</span></label>
+        <div class="skills-list" id="skillsList"></div>
+        <div class="skills-add-row">
+          <input type="text" id="skillAddName" placeholder="Skill name (e.g. 'data-viz')">
+          <input type="text" id="skillAddDesc" placeholder="Short description" style="flex:1.5">
+          <button id="skillAddBtn">+ Add</button>
+        </div>
+        <div class="desc" style="margin-top:6px">Skills are injected into the system prompt on every turn. Click a skill to edit its instructions. Skills persist across sessions in localStorage.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="cancelSettings">Cancel</button>
+      <button class="save-btn" id="saveSettings">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIG CODE MODAL ===== -->
+<div class="modal-overlay" id="configOverlay">
+  <div class="modal" id="configModal">
+    <div class="modal-header"><h2 id="configModalTitle">Config Code</h2><button class="close-btn" id="closeConfig">&times;</button></div>
+    <div class="modal-body">
+      <div id="configExportView">
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">A config code is a base64-encoded string that captures your entire Vecode setup — theme, API settings, files, and skills. Share it, back it up, or move it to another browser.</p>
+        <div class="config-options" id="configOptions">
+          <label class="config-opt"><input type="checkbox" id="optTheme" checked> Theme</label>
+          <label class="config-opt"><input type="checkbox" id="optSettings" checked> API settings (endpoint, model, temperature, system prompt)</label>
+          <label class="config-opt"><input type="checkbox" id="optApiKey" > <strong style="color:var(--red)">Include API key</strong> <span style="color:var(--text3);font-size:11px;margin-left:4px">(warning: anyone with this code can use your key)</span></label>
+          <label class="config-opt"><input type="checkbox" id="optFiles" checked> Files in VFS</label>
+          <label class="config-opt"><input type="checkbox" id="optSkills" checked> Learned skills</label>
+        </div>
+        <div id="configWarn" class="config-warn" style="display:none">⚠ This config code contains your API key. Treat it like a password — do not share it publicly.</div>
+        <textarea class="config-code-area" id="configCodeOut" readonly placeholder="Your config code will appear here..."></textarea>
+        <div class="config-stats" id="configStats"></div>
+        <div class="config-actions">
+          <button id="configGenerate" class="primary">Generate code</button>
+          <button id="configCopy">Copy to clipboard</button>
+          <button id="configDownload">Download as .txt</button>
+        </div>
+      </div>
+      <div id="configImportView" style="display:none">
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">Paste a config code below to restore a previously exported setup. This will <strong>replace</strong> your current theme, settings, files, and skills (only the parts included in the code).</p>
+        <textarea class="config-code-area" id="configCodeIn" placeholder="Paste config code here (starts with 'vecode-config:...')"></textarea>
+        <div class="config-actions">
+          <button id="configApply" class="primary">Apply config</button>
+          <button id="configCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DROP OVERLAY (for file drag-and-drop) ===== -->
+<div id="dropOverlay"><div class="drop-msg">Drop files to import into VFS</div></div>
+
+<!-- ===== HELP MODAL ===== -->
+<div class="modal-overlay" id="helpOverlay">
+  <div class="modal" id="helpModal">
+    <div class="modal-header"><h2>Vecode Help</h2><button class="close-btn" id="closeHelp">&times;</button></div>
+    <div class="modal-body">
+      <div class="help-tabs" id="helpTabs">
+        <div class="help-tab active" data-tab="quickstart">Quick Start</div>
+        <div class="help-tab" data-tab="byok">API Keys (BYOK)</div>
+        <div class="help-tab" data-tab="free">Free APIs</div>
+        <div class="help-tab" data-tab="tools">Tools</div>
+        <div class="help-tab" data-tab="tips">Tips &amp; Shortcuts</div>
+      </div>
+
+      <!-- TAB: QUICK START -->
+      <div class="help-section active" data-tab="quickstart">
+        <h3>What is Vecode?</h3>
+        <p>Vecode is an AI coding agent that runs <strong>entirely in your browser</strong>. You describe what you want to build in plain English, and the agent writes files, executes JavaScript in a sandbox, and shows you a live preview — all without installing anything.</p>
+        <p>It uses a <strong>ReAct (Reason + Act) loop</strong>: the AI thinks about your request, calls tools to write files and run code, observes the results, and iterates until the task is done.</p>
+        <h3 style="margin-top:18px">30-second setup</h3>
+        <ol>
+          <li>Click <strong>⚙ Settings</strong> in the top bar.</li>
+          <li>Click a provider chip (e.g. <strong>Groq (free)</strong> or <strong>OpenAI</strong>).</li>
+          <li>Paste your API key. (No key? See the <strong>Free APIs</strong> tab.)</li>
+          <li>Click <strong>Save Settings</strong>. The green dot in the logo means you're connected.</li>
+          <li>Type a request like <code>build a todo app with local storage</code> and hit <span class="kbd">Enter</span>.</li>
+        </ol>
+        <div class="callout"><strong>No key yet?</strong> The <strong>Free APIs</strong> tab below lists providers that give you a key in under 60 seconds — Groq, HuggingFace, Cloudflare, and more — all free.</div>
+      </div>
+
+      <!-- TAB: BYOK -->
+      <div class="help-section" data-tab="byok">
+        <h3>Bring Your Own Key (BYOK)</h3>
+        <p>Vecode does not include a built-in API. You bring your own key from any OpenAI-compatible provider. This keeps you in full control of costs, model choice, and data privacy.</p>
+        <p><strong>Where your key goes:</strong> It is stored only in your browser's <code>localStorage</code>. It is sent <em>only</em> to the endpoint URL you configure — never to any third-party server.</p>
+        <h3 style="margin-top:18px">Step-by-step: getting a key</h3>
+        <table class="provider-table">
+          <tr><th>Provider</th><th>Sign-up URL</th><th>Key prefix</th><th>Cost</th></tr>
+          <tr><td>OpenAI</td><td><code>platform.openai.com/api-keys</code></td><td><code>sk-...</code></td><td class="paid">paid</td></tr>
+          <tr><td>OpenRouter</td><td><code>openrouter.ai/keys</code></td><td><code>sk-or-...</code></td><td><span class="free">free tier</span></td></tr>
+          <tr><td>Groq</td><td><code>console.groq.com/keys</code></td><td><code>gsk_...</code></td><td><span class="free">free</span></td></tr>
+          <tr><td>HuggingFace</td><td><code>huggingface.co/settings/tokens</code></td><td><code>hf_...</code></td><td><span class="free">free</span></td></tr>
+          <tr><td>Google Gemini</td><td><code>aistudio.google.com/apikey</code></td><td><code>AIza...</code></td><td><span class="free">free tier</span></td></tr>
+          <tr><td>Together AI</td><td><code>api.together.xyz/settings/api-keys</code></td><td><code>...</code></td><td><span class="free">free tier</span></td></tr>
+          <tr><td>Mistral</td><td><code>console.mistral.ai/api-keys</code></td><td><code>...</code></td><td><span class="free">free tier</span></td></tr>
+          <tr><td>Cloudflare AI</td><td><code>dash.cloudflare.com</code> → My Profile → API Tokens</td><td><code>...</code></td><td><span class="free">free</span></td></tr>
+          <tr><td>DeepSeek</td><td><code>platform.deepseek.com/api_keys</code></td><td><code>sk-...</code></td><td class="paid">paid</td></tr>
+          <tr><td>Ollama (local)</td><td>install from <code>ollama.com</code>, run <code>ollama serve</code></td><td>—</td><td><span class="free">free</span></td></tr>
+        </table>
+        <h3 style="margin-top:18px">Common issues</h3>
+        <ul>
+          <li><strong>401 Unauthorized:</strong> key is wrong or has been rotated. Re-paste it.</li>
+          <li><strong>404 Not Found:</strong> the endpoint URL is wrong — it should end with <code>/v1</code> (or <code>/openai</code> for Gemini).</li>
+          <li><strong>Model not found:</strong> check the model ID matches exactly what the provider lists (e.g. <code>llama-3.3-70b-versatile</code> for Groq, not just <code>llama3</code>).</li>
+          <li><strong>CORS error:</strong> some local providers (Ollama, LM Studio) need to be started with CORS enabled. For Ollama: <code>OLLAMA_ORIGINS=* ollama serve</code>.</li>
+          <li><strong>Rate limit (429):</strong> free tiers are limited — wait a minute, or switch to a paid provider.</li>
+        </ul>
+        <div class="callout"><strong>Tip:</strong> The <em>show</em> button next to the API key field lets you verify what you pasted. Keys are case-sensitive.</div>
+      </div>
+
+      <!-- TAB: FREE APIS -->
+      <div class="help-section" data-tab="free">
+        <h3>Free AI APIs — curated list</h3>
+        <p>There is a vibrant ecosystem of free, OpenAI-compatible API endpoints you can use with Vecode right now. The community-maintained list below is the single best starting point — it tracks providers, free tiers, rate limits, and model availability.</p>
+        <a href="https://github.com/YoannDev90/awesome-free-ai-api" target="_blank" rel="noopener" class="ext-link">★ awesome-free-ai-api on GitHub ↗</a>
+        <p>Below are the providers we recommend for use with Vecode. All of them expose an OpenAI-compatible endpoint, so you can paste the URL straight into Settings.</p>
+        <table class="provider-table">
+          <tr><th>Provider</th><th>Endpoint</th><th>Example model</th><th>Notes</th></tr>
+          <tr><td><strong>Groq</strong></td><td><code>https://api.groq.com/openai/v1</code></td><td><code>llama-3.3-70b-versatile</code></td><td><span class="free">Very fast, free tier</span></td></tr>
+          <tr><td><strong>HuggingFace</strong></td><td><code>https://router.huggingface.co/v1</code></td><td><code>meta-llama/Llama-3.3-70B-Instruct</code></td><td><span class="free">Free, many models</span></td></tr>
+          <tr><td><strong>Cloudflare AI</strong></td><td><code>https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1</code></td><td><code>@cf/meta/llama-3.1-8b-instruct</code></td><td><span class="free">Free, replace {ACCOUNT_ID}</span></td></tr>
+          <tr><td><strong>Google Gemini</strong></td><td><code>https://generativelanguage.googleapis.com/v1beta/openai</code></td><td><code>gemini-1.5-flash</code></td><td><span class="free">Free tier, fast</span></td></tr>
+          <tr><td><strong>OpenRouter (free models)</strong></td><td><code>https://openrouter.ai/api/v1</code></td><td><code>meta-llama/llama-3.1-8b-instruct:free</code></td><td><span class="free">Filter by <code>:free</code> suffix</span></td></tr>
+          <tr><td><strong>Together AI</strong></td><td><code>https://api.together.xyz/v1</code></td><td><code>meta-llama/Llama-3-70b-chat-hf</code></td><td><span class="free">Free trial credit</span></td></tr>
+          <tr><td><strong>Mistral</strong></td><td><code>https://api.mistral.ai/v1</code></td><td><code>mistral-small-latest</code></td><td><span class="free">Free tier</span></td></tr>
+          <tr><td><strong>Ollama (local)</strong></td><td><code>http://localhost:11434/v1</code></td><td><code>llama3</code></td><td><span class="free">100% free, runs on your machine</span></td></tr>
+        </table>
+        <h3 style="margin-top:18px">Picking a free provider</h3>
+        <ul>
+          <li><strong>For speed:</strong> Groq. Llama 3.3 70B at 500+ tokens/sec.</li>
+          <li><strong>For model variety:</strong> HuggingFace or OpenRouter (free models).</li>
+          <li><strong>For privacy / offline:</strong> Ollama. Runs locally, no key, no internet.</li>
+          <li><strong>For reliability:</strong> Cloudflare Workers AI — backed by Cloudflare's global network.</li>
+          <li><strong>For multimodal (vision):</strong> Google Gemini — free tier includes image input.</li>
+        </ul>
+        <div class="callout"><strong>Found a great free provider?</strong> Add it to the <a href="https://github.com/YoannDev90/awesome-free-ai-api" target="_blank" rel="noopener">awesome-free-ai-api</a> list — it's a community project and contributions are welcome.</div>
+      </div>
+
+      <!-- TAB: TOOLS -->
+      <div class="help-section" data-tab="tools">
+        <h3>The agent's tools</h3>
+        <p>Vecode's AI uses these tools to actually do work — not just chat about it. You'll see them being called in real-time in the Console pane.</p>
+        <table class="provider-table">
+          <tr><th>Tool</th><th>What it does</th></tr>
+          <tr><td><code>write_file</code></td><td>Creates or overwrites a file in the virtual file system (VFS).</td></tr>
+          <tr><td><code>read_file</code></td><td>Reads the content of a VFS file — used to verify its own work.</td></tr>
+          <tr><td><code>list_files</code></td><td>Lists every file currently in the VFS.</td></tr>
+          <tr><td><code>execute_js</code></td><td>Runs JavaScript in a sandboxed Web Worker. Captures <code>console.log</code>, errors, and return values.</td></tr>
+          <tr><td><code>render_preview</code></td><td>Bundles HTML/CSS/JS into the live preview iframe on the right.</td></tr>
+          <tr><td><code>learn_skill</code></td><td>Permanently saves a new skill to localStorage. Skill instructions are injected into the system prompt on every future turn. The agent gets better over time.</td></tr>
+          <tr><td><code>list_skills</code></td><td>Lists all skills the agent has learned so far.</td></tr>
+          <tr><td><code>task_complete</code></td><td>Signals that the task is done. The argument is the final summary you see.</td></tr>
+        </table>
+        <h3 style="margin-top:18px">The ReAct loop</h3>
+        <ol>
+          <li><strong>Reason</strong> — the AI plans what to do next.</li>
+          <li><strong>Act</strong> — it calls one or more tools.</li>
+          <li><strong>Observe</strong> — it reads the tool results from the console.</li>
+          <li><strong>Repeat</strong> — until it calls <code>task_complete</code> or returns a final text answer.</li>
+        </ol>
+        <p>The loop is capped at 20 iterations to prevent runaway costs. If it hits the cap, you'll see a warning in chat — refine your prompt and try again.</p>
+      </div>
+
+      <!-- TAB: TIPS -->
+      <div class="help-section" data-tab="tips">
+        <h3>Writing better prompts</h3>
+        <ul>
+          <li><strong>Be specific:</strong> <code>a pomodoro timer with a circular progress ring and sound alerts</code> beats <code>a timer</code>.</li>
+          <li><strong>State the audience:</strong> <code>for a 5-year-old learning to count</code> vs <code>for an accountant</code> produces very different UIs.</li>
+          <li><strong>Iterate:</strong> after the first build, say <code>now add a dark mode toggle</code> or <code>make the buttons bigger</code> — the agent has the full VFS context.</li>
+          <li><strong>Ask for explanations:</strong> <code>explain how the auth flow works</code> — the agent will read its own files and answer.</li>
+        </ul>
+        <h3 style="margin-top:18px">Choosing a model</h3>
+        <ul>
+          <li><strong>Big models (gpt-4o, claude-3.5-sonnet, llama-3.1-405b):</strong> best for complex multi-file projects.</li>
+          <li><strong>Mid models (gpt-4o-mini, gemini-1.5-flash, llama-3.3-70b):</strong> great default for most tasks — fast and cheap.</li>
+          <li><strong>Small models (llama-3.1-8b, mistral-small, gemini-1.5-flash-8b):</strong> fine for simple components but may need more iterations.</li>
+          <li>Vecode's system prompt is tuned to make even small models reliable — it gives explicit step-by-step guidance and forces them to use tools.</li>
+        </ul>
+        <h3 style="margin-top:18px">Keyboard shortcuts</h3>
+        <ul>
+          <li><span class="kbd">Enter</span> — send message</li>
+          <li><span class="kbd">Shift</span>+<span class="kbd">Enter</span> — newline in input</li>
+          <li><span class="kbd">Esc</span> — close any open modal</li>
+        </ul>
+        <h3 style="margin-top:18px">Export &amp; import</h3>
+        <ul>
+          <li><strong>Export → .zip</strong>: download all files as a zip archive (built-in ZIP encoder, no libraries).</li>
+          <li><strong>Export → bundled HTML</strong>: one self-contained <code>index.html</code> with all CSS/JS inlined.</li>
+          <li><strong>Export → JSON</strong>: save the whole VFS as a <code>.json</code> you can re-import later.</li>
+          <li><strong>Import files from disk</strong>: pick one or more files (.html, .css, .js, .md, .py, anything text) and they're added to the VFS. <em>Or just drag-and-drop files anywhere on the window.</em></li>
+          <li><strong>Export / Import config code</strong>: a base64 string that captures your <em>entire setup</em> — theme, API settings, files, and skills. Great for backups or moving to another browser. Optionally include the API key (with a warning — anyone with the code can use it).</li>
+        </ul>
+        <h3 style="margin-top:18px">Auto-learned skills</h3>
+        <p>The agent has a <code>learn_skill</code> tool. When it discovers a reusable technique, pattern, or design principle, it can save it as a permanent skill. Learned skills are injected into the system prompt on every future turn, so the agent gets better over time.</p>
+        <ul>
+          <li><strong>Automatic:</strong> ask the agent to "learn a skill for X" or just let it decide on its own.</li>
+          <li><strong>Manual:</strong> add skills in <strong>Settings → Learned Skills</strong>. Give each one a name, short description, and full instructions.</li>
+          <li><strong>Persistent:</strong> skills survive page reloads (stored in localStorage).</li>
+          <li><strong>Portable:</strong> include them in a config code to share with another browser.</li>
+        </ul>
+        <h3 style="margin-top:18px">Themes</h3>
+        <p>Vecode ships with <strong>13 themes</strong>: Carbon, Slate, Solarized, Tokyo Night, Dracula, Gruvbox, Nord, Rosé Pine, One Dark, Catppuccin, GitHub Light, Synthwave, and Ayu Dark. Switch in Settings → your choice is saved.</p>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="save-btn" id="closeHelpBtn">Got it</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================================================================
+   VECODE — Easy-to-use AI coding agent inside your browser
+   ================================================================
+   Sections:
+     1. State & Config
+     2. Virtual File System (VFS)
+     3. Web Worker (sandboxed JS execution)
+     4. Settings Manager (localStorage + themes)
+     5. API Client (OpenAI-compatible streaming + tool_calls)
+     6. Tool Definitions & Execution
+     7. ReAct Agent Loop
+     8. UI Rendering (Chat, File Tree, Code, Preview, Console)
+     9. Markdown Parser
+    10. Syntax Highlighter (regex-based)
+    11. ZIP Encoder (store-only, no deps)
+    12. Export / Import
+    13. Event Wiring & Boot
+   ================================================================ */
+
+/* ---------------- 1. STATE & CONFIG ---------------- */
+const State = {
+  settings: {
+    apiKey: '',
+    endpoint: 'https://api.openai.com/v1',
+    model: 'gpt-4o',
+    systemPrompt: '',
+    temperature: 0.2,
+    theme: 'carbon',
+  },
+  messages: [],
+  vfs: {},
+  activeFile: null,
+  isRunning: false,
+  abortController: null,
+  maxIterations: 20,
+};
+
+const DEFAULT_SYSTEM_PROMPT = `You are Vecode, an AI coding agent that builds working web apps inside a browser sandbox. You write code to a Virtual File System (VFS), test it in a Web Worker, and render it in a live preview iframe.
+
+You ALWAYS use tools to do work. Never describe what you would do — DO it by calling a tool.
+
+# YOUR TOOLS (call these, do not narrate them)
+- write_file(path, content)  → save a file to the VFS. ALWAYS write COMPLETE files, never partial snippets.
+- read_file(path)            → read a file you already wrote (use to verify or refresh context).
+- list_files()               → see what is currently in the VFS.
+- execute_js(code)           → run JavaScript in a sandbox. Returns console.log output and errors. Use to test logic.
+- render_preview()           → bundle all VFS files into the live preview iframe. CALL THIS after writing files.
+- learn_skill(name, description, instructions) → PERMANENTLY learn a new skill. Saved to localStorage, injected into your system prompt on every future turn. Use this when you discover a reusable technique, pattern, or design principle worth remembering. Skills make you better over time.
+- list_skills()              → list all skills you have learned so far.
+- task_complete(message)     → signal you are done. The message is shown to the user as your final summary.
+
+# WHEN TO LEARN A SKILL
+- After solving a non-trivial problem in a way that would generalize (e.g. "to make accessible tabs, use role=tablist + arrow-key navigation + aria-selected").
+- When you notice a design principle worth pinning down (e.g. "for brutalist UIs, use raw black on white, monospace, no border-radius, oversized type").
+- When the user explicitly asks you to remember something for next time.
+- Do NOT learn trivial skills ("how to write a div"). Only learn things that would change your future behavior.
+- Keep skill instructions concise (3-10 lines) and actionable — start with "When X, do Y."
+
+# MANDATORY WORKFLOW (follow every time)
+1. THINK: in 1-3 sentences, say what you are about to build and which files you will create.
+2. ACT: call write_file for each file the app needs. Default to a single index.html for simple apps.
+3. VERIFY: call render_preview so the user sees the result.
+4. FINISH: call task_complete with a 1-2 sentence summary of what you built.
+
+If you hit an error or the user asks for a change, repeat from step 1.
+
+# CODE QUALITY RULES (non-negotiable)
+- Write COMPLETE, RUNNABLE code. Never write placeholders like "// rest of code here" or "...". Every function must have a full body.
+- For any web app: create an index.html as the entry point. Inline CSS in <style> and JS in <script> for simple apps; split into .css/.js files only for complex multi-file projects.
+- Use modern ES6+ JavaScript (const, let, arrow functions, template literals, async/await).
+- Use semantic HTML5 elements (header, main, nav, section, article, footer).
+- Make it responsive: use flexbox or grid, never fixed pixel widths for layout.
+- Respect prefers-reduced-motion in any CSS animation.
+- Add visible :focus-visible states for keyboard users.
+- Test interactivity in your head before calling task_complete.
+
+# DESIGN PROCESS — Frontend Design Skill
+Design Thinking
+Before coding, understand the context and commit to a BOLD aesthetic direction:
+
+Purpose: What problem does this interface solve? Who uses it?
+Tone: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
+Constraints: Technical requirements (framework, performance, accessibility).
+Differentiation: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+CRITICAL: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+
+Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
+
+Production-grade and functional
+Visually striking and memorable
+Cohesive with a clear aesthetic point-of-view
+Meticulously refined in every detail
+Frontend Aesthetics Guidelines
+Focus on:
+
+Typography: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
+Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
+Motion: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
+Spatial Composition: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
+Backgrounds & Visual Details: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
+
+Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
+
+IMPORTANT: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+
+Remember: Vecode is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+
+# SMALL-MODEL GUIDANCE (you may be running on a small model — that's fine)
+- If you are unsure about a feature, build a simpler version that works rather than a complex version that doesn't.
+- Prefer one well-built file over many half-built files.
+- If you wrote a file and it has a bug you can spot, just call write_file again with the corrected version — the new version replaces the old one.
+- After writing files, ALWAYS call render_preview before task_complete. The user needs to see something.
+- Keep your text responses SHORT. Most of your output should be tool calls, not prose.
+- If the user asks for a change, you do not need to rebuild from scratch — use read_file to see what exists, then write_file to update.
+- You don't need to print the full design plan in chat — keep the brainstorm internal and just build. The code IS the deliverable.
+
+# EXAMPLE INTERACTION
+User: "build a counter app"
+You (text): "I'll create a counter app with increment, decrement, and reset buttons."
+You (tool call): write_file("index.html", "<!DOCTYPE html>...complete file...")
+You (tool call): render_preview()
+You (tool call): task_complete("Built a counter app with +, -, and reset buttons. The count persists in localStorage.")
+
+# ANTI-PATTERNS (do not do these)
+- DO NOT say "I would create a file" and then not call write_file.
+- DO NOT write partial code or code with "...". Write the full file every time.
+- DO NOT call task_complete before render_preview.
+- DO NOT explain the code in long paragraphs — let the code speak.
+- DO NOT use external CDNs or imports — everything must run offline in the iframe sandbox.`;
+
+
+/* ---------------- 2. VIRTUAL FILE SYSTEM ---------------- */
+const VFS = {
+  write(path, content){
+    State.vfs[path] = content;
+    UI.renderFileTree();
+    if(State.activeFile === path) UI.renderCodeView(path);
+  },
+  read(path){ return State.vfs[path] !== undefined ? State.vfs[path] : null; },
+  list(){ return Object.keys(State.vfs).sort(); },
+  delete(path){
+    delete State.vfs[path];
+    if(State.activeFile === path) State.activeFile = null;
+    UI.renderFileTree();
+    UI.renderCodeView(null);
+  },
+  clear(){
+    State.vfs = {}; State.activeFile = null;
+    UI.renderFileTree(); UI.renderCodeView(null); UI.renderPreview();
+    // clean up blob URL on clear
+    const frame = document.getElementById('previewFrame');
+    if(frame._blobUrl){ URL.revokeObjectURL(frame._blobUrl); frame._blobUrl = null; }
+  },
+  bundle(){
+    const files = State.vfs;
+    let html = files['index.html'] || null;
+    if(!html){
+      const hasHTML = Object.keys(files).some(f=>f.endsWith('.html'));
+      if(!hasHTML && Object.keys(files).length === 0) return null;
+      html = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="UTF-8">\n';
+      for(const [path, content] of Object.entries(files)){
+        if(path.endsWith('.css')) html += `<style>\n${content}\n</style>\n`;
+      }
+      html += '</head>\n<body>\n';
+      for(const [path, content] of Object.entries(files)){
+        if(path.endsWith('.js')) html += `<script>\n${content}\n<\/script>\n`;
+      }
+      html += '</body>\n</html>';
+      return html;
+    }
+    let bundled = html;
+    for(const [path, content] of Object.entries(files)){
+      if(path.endsWith('.css') && !html.includes(path)){
+        const styleTag = `<style data-file="${path}">\n${content}\n</style>`;
+        bundled = bundled.replace('</head>', styleTag + '\n</head>') || (bundled + styleTag);
+      }
+    }
+    for(const [path, content] of Object.entries(files)){
+      if(path.endsWith('.js') && !html.includes(path)){
+        const scriptTag = `<script data-file="${path}">\n${content}\n<\/script>`;
+        bundled = bundled.replace('</body>', scriptTag + '\n</body>') || (bundled + scriptTag);
+      }
+    }
+    return bundled;
+  }
+};
+
+/* ---------------- 3. WEB WORKER (sandboxed JS execution) ---------------- */
+const WORKER_CODE = `
+self.onmessage = function(e){
+  var code = e.data.code;
+  var logs = [];
+  var origLog = console.log, origErr = console.error, origWarn = console.warn, origInfo = console.info;
+  function captureArgs(args){
+    return Array.prototype.map.call(args, function(a){
+      try{ if(typeof a === 'object' && a !== null) return JSON.stringify(a, null, 2); return String(a); }catch(ex){ return String(a); }
+    }).join(' ');
+  }
+  console.log = function(){ logs.push({type:'log', msg: captureArgs(arguments)}); origLog.apply(console, arguments); };
+  console.error = function(){ logs.push({type:'error', msg: captureArgs(arguments)}); origErr.apply(console, arguments); };
+  console.warn = function(){ logs.push({type:'warn', msg: captureArgs(arguments)}); origWarn.apply(console, arguments); };
+  console.info = function(){ logs.push({type:'info', msg: captureArgs(arguments)}); origInfo.apply(console, arguments); };
+  try{
+    var result = eval(code);
+    if(result !== undefined) logs.push({type:'log', msg: 'Return value: ' + (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))});
+    self.postMessage({type:'done', logs: logs});
+  }catch(err){
+    logs.push({type:'error', msg: err.name + ': ' + err.message});
+    self.postMessage({type:'done', logs: logs, error: err.name + ': ' + err.message});
+  }finally{
+    console.log = origLog; console.error = origErr; console.warn = origWarn; console.info = origInfo;
+  }
+};
+`;
+const Sandbox = {
+  worker: null, blobUrl: null,
+  init(){
+    if(this.worker) this.terminate();
+    const blob = new Blob([WORKER_CODE], {type:'application/javascript'});
+    this.blobUrl = URL.createObjectURL(blob);
+    this.worker = new Worker(this.blobUrl);
+  },
+  terminate(){
+    if(this.worker){ this.worker.terminate(); this.worker = null; }
+    if(this.blobUrl){ URL.revokeObjectURL(this.blobUrl); this.blobUrl = null; }
+  },
+  execute(code){
+    return new Promise((resolve)=>{
+      if(!this.worker) this.init();
+      const w = this.worker;
+      const handler = (e)=>{ w.removeEventListener('message', handler); resolve(e.data); };
+      w.addEventListener('message', handler);
+      w.postMessage({code});
+    });
+  }
+};
+
+/* ---------------- 4. SETTINGS MANAGER ---------------- */
+const Settings = {
+  load(){
+    try{
+      const s = localStorage.getItem('vecode_settings');
+      if(s){ State.settings = {...State.settings, ...JSON.parse(s)}; }
+    }catch(e){}
+    if(!State.settings.systemPrompt) State.settings.systemPrompt = DEFAULT_SYSTEM_PROMPT;
+    this.applyTheme(State.settings.theme || 'carbon');
+  },
+  save(){
+    try{ localStorage.setItem('vecode_settings', JSON.stringify(State.settings)); }catch(e){}
+  },
+  isConfigured(){ return !!(State.settings.apiKey && State.settings.endpoint && State.settings.model); },
+  applyTheme(theme){
+    document.body.setAttribute('data-theme', theme);
+    State.settings.theme = theme;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const themeColors = {carbon:'#0d1117', slate:'#f6f8fa', solarized:'#002b36', tokyo:'#1a1b26'};
+    if(meta) meta.setAttribute('content', themeColors[theme] || '#0d1117');
+  }
+};
+
+/* ---------------- 4b. SKILLS MANAGER (auto-learned, persisted) ---------------- */
+const SKILLS_KEY = 'vecode_skills_v1';
+const Skills = {
+  list: [],   // [{id, name, description, instructions, createdAt, learnedBy}]
+  load(){
+    try{
+      const raw = localStorage.getItem(SKILLS_KEY);
+      if(raw) this.list = JSON.parse(raw);
+    }catch(e){ this.list = []; }
+    if(!Array.isArray(this.list)) this.list = [];
+  },
+  save(){
+    try{ localStorage.setItem(SKILLS_KEY, JSON.stringify(this.list)); }catch(e){}
+  },
+  add({name, description, instructions, learnedBy='manual'}){
+    if(!name || !instructions) return null;
+    // de-dup by name (case-insensitive) — overwrite if exists
+    const existing = this.list.findIndex(s => s.name.toLowerCase() === name.toLowerCase());
+    const skill = {
+      id: existing >= 0 ? this.list[existing].id : ('skill_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)),
+      name: name.trim(),
+      description: (description || '').trim(),
+      instructions: instructions.trim(),
+      learnedBy,
+      createdAt: existing >= 0 ? this.list[existing].createdAt : new Date().toISOString()
+    };
+    if(existing >= 0) this.list[existing] = skill;
+    else this.list.push(skill);
+    this.save();
+    return skill;
+  },
+  remove(id){
+    this.list = this.list.filter(s => s.id !== id);
+    this.save();
+  },
+  get(id){ return this.list.find(s => s.id === id); },
+  // Build the skills injection block for the system prompt
+  buildPromptBlock(){
+    if(this.list.length === 0) return '';
+    let block = '\n\n# LEARNED SKILLS (apply when relevant to the task)\n';
+    block += 'These are skills you have learned or that have been given to you. Apply their instructions when the task calls for them.\n\n';
+    for(const s of this.list){
+      block += `## Skill: ${s.name}\n`;
+      if(s.description) block += `Description: ${s.description}\n`;
+      block += `Instructions:\n${s.instructions}\n\n`;
+    }
+    return block;
+  },
+  // Build the augmented system prompt: base prompt + skills
+  buildSystemPrompt(){
+    const base = State.settings.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+    return base + this.buildPromptBlock();
+  }
+};
+
+/* ---------------- 5. API CLIENT (streaming + tool_calls) ---------------- */
+const APIClient = {
+  async *streamChat(messages, tools, signal){
+    const url = State.settings.endpoint.replace(/\/+$/,'') + '/chat/completions';
+    const body = { model: State.settings.model, messages, temperature: State.settings.temperature, stream: true };
+    if(tools && tools.length) body.tools = tools;
+    let resp;
+    try{
+      resp = await fetch(url, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+State.settings.apiKey},
+        body: JSON.stringify(body), signal
+      });
+    }catch(e){
+      if(e.name === 'AbortError') return;
+      yield {type:'error', message:'Network error: '+e.message}; return;
+    }
+    if(!resp.ok){
+      let errMsg = 'HTTP '+resp.status;
+      try{
+        const errBody = await resp.text();
+        const errJson = JSON.parse(errBody);
+        errMsg = errJson.error?.message || errJson.error || errBody.slice(0,300) || errMsg;
+      }catch(e){}
+      yield {type:'error', message: errMsg}; return;
+    }
+    if(!resp.body){ yield {type:'error', message:'No response body'}; return; }
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '', accumulatedText = '', accumulatedToolCalls = [], finishReason = null;
+    try{
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        buffer += decoder.decode(value, {stream:true});
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for(const line of lines){
+          const trimmed = line.trim();
+          if(!trimmed || !trimmed.startsWith('data:')) continue;
+          const data = trimmed.slice(5).trim();
+          if(data === '[DONE]') continue;
+          try{
+            const chunk = JSON.parse(data);
+            const choice = chunk.choices?.[0];
+            if(!choice) continue;
+            const delta = choice.delta;
+            if(!delta) continue;
+            if(delta.content){ accumulatedText += delta.content; yield {type:'text', delta: delta.content}; }
+            if(delta.tool_calls){
+              for(const tc of delta.tool_calls){
+                const idx = tc.index ?? 0;
+                if(!accumulatedToolCalls[idx]) accumulatedToolCalls[idx] = {id:tc.id||'', type:'function', function:{name:'',arguments:''}};
+                if(tc.id) accumulatedToolCalls[idx].id = tc.id;
+                if(tc.function?.name) accumulatedToolCalls[idx].function.name += tc.function.name;
+                if(tc.function?.arguments) accumulatedToolCalls[idx].function.arguments += tc.function.arguments;
+              }
+            }
+            if(choice.finish_reason) finishReason = choice.finish_reason;
+          }catch(e){}
+        }
+      }
+    }catch(e){
+      if(e.name !== 'AbortError') yield {type:'error', message:'Stream read error: '+e.message};
+      return;
+    }
+    if(finishReason === 'tool_calls' || accumulatedToolCalls.length > 0){
+      accumulatedToolCalls = accumulatedToolCalls.filter(tc => tc && tc.function && tc.function.name);
+      for(let i=0;i<accumulatedToolCalls.length;i++) if(!accumulatedToolCalls[i].id) accumulatedToolCalls[i].id = 'call_'+i+'_'+Date.now();
+      if(accumulatedToolCalls.length){ yield {type:'tool_calls', tool_calls: accumulatedToolCalls, text: accumulatedText}; return; }
+    }
+    yield {type:'done', text: accumulatedText};
+  }
+};
+
+
+/* ---------------- 6. TOOL DEFINITIONS & EXECUTION ---------------- */
+const TOOL_SCHEMAS = [
+  {type:'function',function:{name:'write_file',description:'Write or overwrite a file in the Virtual File System.',parameters:{type:'object',properties:{path:{type:'string',description:'File path, e.g. "index.html"'},content:{type:'string',description:'The full file content'}},required:['path','content']}}},
+  {type:'function',function:{name:'read_file',description:'Read the contents of a file from the VFS.',parameters:{type:'object',properties:{path:{type:'string',description:'The file path to read'}},required:['path']}}},
+  {type:'function',function:{name:'list_files',description:'List all files currently in the VFS.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'execute_js',description:'Execute JavaScript code in a sandboxed Web Worker. Returns console.log output and any errors.',parameters:{type:'object',properties:{code:{type:'string',description:'The JavaScript code to execute'}},required:['code']}}},
+  {type:'function',function:{name:'render_preview',description:'Bundle all files in the VFS and render them in the live preview iframe.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'learn_skill',description:'Permanently learn a new skill. The skill instructions are saved to localStorage and injected into your system prompt on every future turn. Use this when you discover a reusable technique, pattern, or design principle worth remembering. Skills can be viewed and managed in Settings.',parameters:{type:'object',properties:{name:{type:'string',description:'Short skill name (lowercase-hyphenated, e.g. "accessibility-audit" or "css-grid-layout")'},description:{type:'string',description:'One-sentence description of when this skill applies'},instructions:{type:'string',description:'The full skill instructions — what to do, how to think about it, what to produce. Be specific and actionable.'}},required:['name','description','instructions']}}},
+  {type:'function',function:{name:'list_skills',description:'List all skills you have learned so far.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'task_complete',description:'Signal that the task is complete. Provide a summary message.',parameters:{type:'object',properties:{message:{type:'string',description:'Summary of what was accomplished'}},required:['message']}}}
+];
+
+const Tools = {
+  async execute(name, args){
+    UI.log('agent', `→ ${name}`);
+    switch(name){
+      case 'write_file': {
+        const {path, content} = args;
+        if(!path || content === undefined) return 'Error: path and content required';
+        VFS.write(path, content);
+        UI.log('success', `✓ Wrote ${path} (${content.length} bytes)`);
+        return `Successfully wrote ${content.length} bytes to ${path}`;
+      }
+      case 'read_file': {
+        const {path} = args;
+        if(!path) return 'Error: path required';
+        const content = VFS.read(path);
+        if(content === null) return `Error: File "${path}" not found`;
+        return content;
+      }
+      case 'list_files': {
+        const files = VFS.list();
+        if(files.length === 0) return 'No files in VFS. Use write_file to create files.';
+        return 'Files in VFS:\n' + files.map(f => `  - ${f} (${State.vfs[f].length} bytes)`).join('\n');
+      }
+      case 'execute_js': {
+        const {code} = args;
+        if(!code) return 'Error: code required';
+        UI.log('info', 'Executing JS in Web Worker...');
+        const result = await Sandbox.execute(code);
+        const logs = result.logs || [];
+        UI.logWorker(logs);
+        if(result.error){ UI.log('error', `✗ ${result.error}`); return `Execution error: ${result.error}\n\nConsole output:\n${logs.map(l=>`[${l.type}] ${l.msg}`).join('\n')}`; }
+        UI.log('success', '✓ JS executed');
+        return logs.map(l => `[${l.type}] ${l.msg}`).join('\n') || '(no console output)';
+      }
+      case 'render_preview': {
+        const html = VFS.bundle();
+        if(!html) return 'Error: No files to preview. Write an index.html first.';
+        UI.renderPreview(html);
+        // auto-switch to the preview pane on mobile so the user sees the result
+        if(window.innerWidth <= 860) UI.switchMobilePane('rightPane');
+        UI.log('success', '✓ Preview rendered');
+        return 'Preview rendered successfully.';
+      }
+      case 'task_complete': {
+        UI.log('success', `✓ ${args.message || 'Task complete'}`);
+        return {__task_complete: true, message: args.message || 'Task complete'};
+      }
+      case 'learn_skill': {
+        const {name, description, instructions} = args;
+        if(!name || !instructions) return 'Error: name and instructions required';
+        const skill = Skills.add({name, description, instructions, learnedBy:'agent'});
+        if(!skill) return 'Error: failed to save skill';
+        UI.log('success', `✓ Learned skill: ${skill.name}`);
+        UI.renderSkillsList();
+        return `Skill "${skill.name}" learned and saved. It will be applied on all future turns. Total skills: ${Skills.list.length}.`;
+      }
+      case 'list_skills': {
+        if(Skills.list.length === 0) return 'No skills learned yet. Use learn_skill to add one.';
+        return 'Learned skills:\n' + Skills.list.map(s => `  - ${s.name}: ${s.description || '(no description)'} [learned by ${s.learnedBy}]`).join('\n');
+      }
+      default: return `Error: Unknown tool "${name}"`;
+    }
+  }
+};
+
+/* ---------------- 7. REACT AGENT LOOP ---------------- */
+const Agent = {
+  // Build a small context block the LLM sees at the start of each user turn.
+  // Helps small models that lose track of what files exist.
+  buildContextPrefix(userInput){
+    const files = VFS.list();
+    let ctx = '';
+    if(files.length > 0){
+      ctx += `[VFS CONTEXT — ${files.length} file${files.length!==1?'s':''} currently in workspace:]\n`;
+      for(const f of files){
+        const size = State.vfs[f].length;
+        const ext = f.split('.').pop().toLowerCase();
+        const typeLabel = {html:'HTML',css:'CSS',js:'JS',json:'JSON',md:'MD'}[ext] || ext.toUpperCase();
+        ctx += `  - ${f} (${typeLabel}, ${size} bytes)\n`;
+      }
+      ctx += '[/VFS CONTEXT]\n\n';
+    } else {
+      ctx += '[VFS CONTEXT — workspace is empty. Create files with write_file.]\n\n';
+    }
+    return ctx + userInput;
+  },
+
+  // Detect transient errors that are worth a retry
+  isTransientError(msg){
+    return /rate.?limit|429|temporar|timeout|network|fetch|ECONNRESET|socket hang up|service unavail|overloaded/i.test(msg);
+  },
+
+  async streamWithRetry(apiMessages, signal, maxRetries){
+    let lastErr = null;
+    for(let attempt = 0; attempt <= maxRetries; attempt++){
+      if(signal.aborted) return {type:'error', message:'Aborted'};
+      let collected = {text:'', toolCalls:null, error:null};
+      for await (const chunk of APIClient.streamChat(apiMessages, TOOL_SCHEMAS, signal)){
+        if(chunk.type === 'text') collected.text += chunk.delta;
+        else if(chunk.type === 'tool_calls'){ collected.toolCalls = chunk.tool_calls; if(chunk.text) collected.text = chunk.text; break; }
+        else if(chunk.type === 'error'){ collected.error = chunk.message; break; }
+        else if(chunk.type === 'done') break;
+      }
+      if(!collected.error) return collected;
+      lastErr = collected.error;
+      if(this.isTransientError(collected.error) && attempt < maxRetries){
+        const waitMs = 1000 * (attempt + 1);
+        UI.log('warn', `Transient error (attempt ${attempt+1}/${maxRetries+1}): ${collected.error}. Retrying in ${waitMs}ms...`);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+      return {type:'error', message: collected.error};
+    }
+    return {type:'error', message: lastErr || 'Unknown error'};
+  },
+
+  async run(userInput){
+    if(!Settings.isConfigured()){
+      UI.addMessage('system', '⚠ Please configure your API in Settings first.');
+      UI.openSettings();
+      return;
+    }
+    if(State.isRunning) return;
+    State.isRunning = true; UI.setRunning(true);
+
+    // Build the contextualized user message (small-model aid)
+    const contextualized = this.buildContextPrefix(userInput);
+    State.messages.push({role:'user', content: contextualized});
+    // Show the user's original (un-contextualized) text in the UI
+    UI.addMessage('user', userInput);
+
+    const apiMessages = [{role:'system', content: Skills.buildSystemPrompt()}, ...State.messages];
+    State.abortController = new AbortController();
+    let iteration = 0;
+    try{
+      while(iteration < State.maxIterations){
+        iteration++;
+        UI.log('agent', `--- iteration ${iteration} ---`);
+        const msgEl = UI.addMessage('assistant', '');
+        let assistantText = '', toolCalls = null;
+
+        const result = await this.streamWithRetry(apiMessages, State.abortController.signal, 2);
+
+        if(result.error){
+          UI.updateMessageContent(msgEl, '❌ Error: ' + result.error, false);
+          UI.log('error', result.error);
+          // Provide actionable hint
+          if(/401|unauthorized/i.test(result.error)){
+            UI.addMessage('system', '💡 Hint: 401 Unauthorized usually means the API key is wrong or expired. Open Settings → re-paste your key.');
+          } else if(/404|not found/i.test(result.error)){
+            UI.addMessage('system', '💡 Hint: 404 Not Found usually means the endpoint URL is wrong. It should end with /v1 (or /openai for Gemini). Check Settings.');
+          } else if(/model/i.test(result.error)){
+            UI.addMessage('system', '💡 Hint: "model not found" means the model ID is wrong for this provider. Check the provider\'s docs for the exact model ID.');
+          } else if(/cors/i.test(result.error)){
+            UI.addMessage('system', '💡 Hint: CORS error — if using Ollama locally, restart it with: OLLAMA_ORIGINS=* ollama serve');
+          }
+          break;
+        }
+        assistantText = result.text || '';
+        toolCalls = result.toolCalls || null;
+
+        UI.updateMessageContent(msgEl, assistantText, false);
+        UI.renderMarkdown(msgEl);
+
+        if(!toolCalls || toolCalls.length === 0){
+          State.messages.push({role:'assistant', content: assistantText});
+          // If the model returned text but never called task_complete or any tool, gently remind it
+          if(iteration === 1 && !assistantText.includes('task_complete')){
+            UI.log('agent', 'Note: model returned text without tool calls. If you expected files to be written, ask again more explicitly.');
+          }
+          break;
+        }
+
+        const assistantMsg = {role:'assistant', content: assistantText || null, tool_calls: toolCalls.map(tc=>({id:tc.id,type:'function',function:{name:tc.function.name,arguments:tc.function.arguments}}))};
+        State.messages.push(assistantMsg); apiMessages.push(assistantMsg);
+        if(assistantText) msgEl.querySelector('.content').innerHTML += '<div class="tool-call-info">Calling: ' + toolCalls.map(tc=>`<span class="fn-name">${tc.function.name}</span>`).join(', ') + '</div>';
+
+        for(const tc of toolCalls){
+          const fnName = tc.function.name;
+          let args = {};
+          try{ args = tc.function.arguments ? JSON.parse(tc.function.arguments) : {}; }
+          catch(e){
+            UI.log('error', `Parse error for ${fnName} args: ${tc.function.arguments}`);
+          }
+          const result = await Tools.execute(fnName, args);
+          const resultStr = typeof result === 'object' ? JSON.stringify(result) : String(result);
+          const displayResult = resultStr.length > 800 ? resultStr.slice(0,800)+'\n... (truncated)' : resultStr;
+          UI.addMessage('tool', `tool: ${fnName}\nargs: ${JSON.stringify(args).slice(0,300)}\nresult: ${displayResult}`);
+          if(result && result.__task_complete){
+            State.messages.push({role:'tool', tool_call_id: tc.id, content: result.message || 'Task complete'});
+            apiMessages.push({role:'tool', tool_call_id: tc.id, content: result.message || 'Task complete'});
+            State.isRunning = false; UI.setRunning(false);
+            return;
+          }
+          const toolMsg = {role:'tool', tool_call_id: tc.id, content: resultStr};
+          State.messages.push(toolMsg); apiMessages.push(toolMsg);
+        }
+      }
+      if(iteration >= State.maxIterations){
+        UI.log('warn', `Max iterations (${State.maxIterations}) reached.`);
+        UI.addMessage('system', `⚠ Reached the iteration cap (${State.maxIterations}). The agent may need a more specific prompt, or you can say "continue" to keep going.`);
+      }
+    }catch(e){
+      if(e.name === 'AbortError'){
+        UI.log('warn', 'Stopped by user.');
+        UI.addMessage('system', '⏹ Generation stopped.');
+      } else {
+        UI.log('error', 'Agent error: ' + e.message);
+        UI.addMessage('system', '❌ Error: ' + e.message);
+      }
+    }finally{
+      State.isRunning = false; UI.setRunning(false); State.abortController = null;
+    }
+  },
+
+
+
+  stop(){
+    if(State.abortController){
+      State.abortController.abort();
+      UI.log('warn', 'Aborting...');
+    }
+  }
+};
+
+/* ---------------- 8. UI RENDERING ---------------- */
+const UI = {
+  addMessage(role, content){
+    const log = document.getElementById('chatLog');
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    const roleLabel = {user:'You', assistant:'Vecode', tool:'Tool Result', system:'System'}[role] || role;
+    div.innerHTML = `<div class="role"><span class="badge"></span>${roleLabel}</div><div class="content"></div>`;
+    log.appendChild(div);
+    if(content){
+      const contentEl = div.querySelector('.content');
+      if(role === 'tool') contentEl.textContent = content;
+      else if(role === 'system') contentEl.innerHTML = content;
+      else { contentEl.innerHTML = this.escapeHtml(content); if(role === 'assistant') this.renderMarkdown(div); }
+    }
+    log.scrollTop = log.scrollHeight;
+    return div;
+  },
+  updateMessageContent(msgEl, text, streaming){
+    const contentEl = msgEl.querySelector('.content');
+    msgEl._rawText = text; // store raw text so renderMarkdown can access newlines
+    if(streaming) contentEl.innerHTML = this.escapeHtml(text).replace(/\n/g,'<br>') + '<span class="stream-cursor"></span>';
+    else contentEl.innerHTML = this.escapeHtml(text).replace(/\n/g,'<br>');
+    document.getElementById('chatLog').scrollTop = document.getElementById('chatLog').scrollHeight;
+  },
+  renderMarkdown(msgEl){
+    const contentEl = msgEl.querySelector('.content');
+    if(!contentEl) return;
+    // use stored raw text (preserves newlines) instead of textContent
+    // (textContent strips <br> tags and loses newlines, breaking markdown parsing)
+    const raw = msgEl._rawText || contentEl.textContent || contentEl.innerText;
+    const html = Markdown.parse(raw);
+    contentEl.innerHTML = html;
+    contentEl.querySelectorAll('pre code').forEach(block=>{ block.innerHTML = SyntaxHL.highlight(block.textContent); });
+    contentEl.querySelectorAll('.copy-code').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const code = btn.parentElement.querySelector('code').textContent;
+        navigator.clipboard.writeText(code).then(()=>{ btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent='Copy', 1500); });
+      });
+    });
+  },
+  escapeHtml(text){ const d = document.createElement('div'); d.textContent = text; return d.innerHTML; },
+  setRunning(running){
+    document.getElementById('sendBtn').style.display = running ? 'none' : '';
+    document.getElementById('stopBtn').style.display = running ? '' : 'none';
+    document.getElementById('sendBtn').disabled = !Settings.isConfigured() && !running;
+  },
+  renderFileTree(){
+    const tree = document.getElementById('fileTree');
+    const files = VFS.list();
+    document.getElementById('fileCount').textContent = files.length + ' file' + (files.length!==1?'s':'');
+    tree.innerHTML = '';
+    if(files.length === 0){ tree.innerHTML = '<div style="padding:8px 14px;font-size:11px;color:var(--text3)">No files yet</div>'; return; }
+    const treeObj = {};
+    for(const path of files){
+      const parts = path.split('/');
+      let node = treeObj;
+      for(let i=0;i<parts.length;i++){
+        if(i === parts.length-1){ node.__files = node.__files || {}; node.__files[parts[i]] = path; }
+        else { node[parts[i]] = node[parts[i]] || {}; node = node[parts[i]]; }
+      }
+    }
+    const renderNode = (node, depth)=>{
+      const dirs = Object.keys(node).filter(k=>k!=='__files' && typeof node[k]==='object').sort();
+      const fns = node.__files ? Object.keys(node.__files).sort() : [];
+      for(const dir of dirs){
+        const item = document.createElement('div');
+        item.className = 'tree-item';
+        item.style.paddingLeft = (14 + depth*14) + 'px';
+        item.innerHTML = `<span class="icon ico-default">📁</span>${dir}`;
+        tree.appendChild(item);
+        renderNode(node[dir], depth+1);
+      }
+      for(const fname of fns){
+        const fullPath = node.__files[fname];
+        const ext = fname.split('.').pop().toLowerCase();
+        const iconClass = {html:'ico-html',css:'ico-css',js:'ico-js',json:'ico-json',md:'ico-md'}[ext] || 'ico-default';
+        const icon = {html:'◈',css:'#',js:'⚡',json:'{}',md:'☰'}[ext] || '○';
+        const item = document.createElement('div');
+        item.className = 'tree-item' + (State.activeFile===fullPath?' active':'');
+        item.style.paddingLeft = (14 + depth*14) + 'px';
+        item.innerHTML = `<span class="icon ${iconClass}">${icon}</span>${fname}<span class="del" data-path="${fullPath}">×</span>`;
+        item.addEventListener('click', (e)=>{
+          if(e.target.classList.contains('del')){ e.stopPropagation(); VFS.delete(fullPath); return; }
+          State.activeFile = fullPath;
+          this.renderFileTree(); this.renderCodeView(fullPath);
+          this.switchMobilePane('codePane');
+        });
+        tree.appendChild(item);
+      }
+    };
+    renderNode(treeObj, 0);
+  },
+  renderCodeView(path){
+    const view = document.getElementById('codeView');
+    const actions = document.getElementById('fileActions');
+    if(!path || !State.vfs[path]){ view.innerHTML = '<div id="codeEmpty">No files yet.<br>Ask Vecode to build something!</div>'; actions.style.display = 'none'; return; }
+    actions.style.display = 'flex';
+    const content = State.vfs[path];
+    const ext = path.split('.').pop().toLowerCase();
+    const highlighted = SyntaxHL.highlight(content, ext);
+    view.innerHTML = `<div class="code-meta">${path} · ${content.length} bytes</div><pre id="codeContent">${highlighted}</pre>`;
+  },
+  renderPreview(html){
+    const frame = document.getElementById('previewFrame');
+    const empty = document.getElementById('previewEmpty');
+    if(!html) html = VFS.bundle();
+    if(!html){
+      frame.style.display = 'none';
+      empty.style.display = 'flex';
+      // revoke any previous blob URL
+      if(frame._blobUrl){ URL.revokeObjectURL(frame._blobUrl); frame._blobUrl = null; }
+      frame.src = 'about:blank';
+      return;
+    }
+    // revoke previous blob URL if any
+    if(frame._blobUrl){ URL.revokeObjectURL(frame._blobUrl); }
+    // use a blob URL instead of srcdoc — more reliable across browsers for
+    // complex HTML with inline scripts, and avoids srcdoc size limits
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    frame._blobUrl = url;
+    // make the iframe visible BEFORE setting src
+    empty.style.display = 'none';
+    frame.style.display = 'block';
+    frame.src = url;
+  },
+  openPreviewTab(){
+    const html = VFS.bundle();
+    if(!html){ this.log('warn','No files to preview'); return; }
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(()=>URL.revokeObjectURL(url), 10000);
+  },
+  log(type, msg){
+    const log = document.getElementById('consoleLog');
+    const time = new Date().toLocaleTimeString();
+    const line = document.createElement('div');
+    line.className = 'log-line ' + type;
+    line.innerHTML = `<span class="ts">[${time}]</span> ${this.escapeHtml(msg)}`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  },
+  logWorker(logs){ for(const e of logs) this.log(e.type, e.msg); },
+  clearConsole(){ document.getElementById('consoleLog').innerHTML = ''; },
+  clearChat(){ State.messages = []; document.getElementById('chatLog').innerHTML = ''; renderEmptyChatHero(); },
+  switchMobilePane(paneId){
+    document.querySelectorAll('.pane').forEach(p=>p.classList.remove('mobile-active'));
+    document.getElementById(paneId).classList.add('mobile-active');
+    document.querySelectorAll('.tab-btn').forEach(t=>t.classList.toggle('active', t.dataset.pane === paneId));
+  },
+  openSettings(){
+    document.getElementById('setApiKey').value = State.settings.apiKey || '';
+    document.getElementById('setEndpoint').value = State.settings.endpoint || '';
+    document.getElementById('setModel').value = State.settings.model || '';
+    document.getElementById('setSystemPrompt').value = State.settings.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+    document.getElementById('setTemp').value = State.settings.temperature ?? 0.2;
+    this.updateApiStatus();
+    this.updateThemeSelection();
+    this.renderSkillsList();
+    document.getElementById('modalOverlay').classList.add('active');
+  },
+  closeSettings(){ document.getElementById('modalOverlay').classList.remove('active'); },
+  saveSettings(){
+    State.settings.apiKey = document.getElementById('setApiKey').value.trim();
+    State.settings.endpoint = document.getElementById('setEndpoint').value.trim() || 'https://api.openai.com/v1';
+    State.settings.model = document.getElementById('setModel').value.trim();
+    const sp = document.getElementById('setSystemPrompt').value.trim();
+    State.settings.systemPrompt = sp || DEFAULT_SYSTEM_PROMPT;
+    State.settings.temperature = parseFloat(document.getElementById('setTemp').value) || 0.2;
+    Settings.save();
+    this.updateModelPill(); this.updateApiStatus();
+    this.closeSettings(); this.setRunning(false);
+    this.log('success', 'Settings saved.');
+  },
+  updateApiStatus(){
+    const el = document.getElementById('apiStatus');
+    if(State.settings.apiKey){ el.className = 'status-ok'; el.textContent = '✓ API key set (' + State.settings.apiKey.slice(0,4) + '...' + State.settings.apiKey.slice(-4) + ')'; }
+    else { el.className = 'status-err'; el.textContent = '⚠ No API key configured'; }
+  },
+  updateModelPill(){
+    const pill = document.getElementById('modelPill');
+    const dot = document.getElementById('connDot');
+    if(Settings.isConfigured()){ pill.textContent = State.settings.model; dot.classList.remove('off'); }
+    else { pill.textContent = 'No model configured'; dot.classList.add('off'); }
+  },
+  updateThemeSelection(){
+    document.querySelectorAll('.theme-card').forEach(c=>c.classList.toggle('active', c.dataset.theme === State.settings.theme));
+  },
+  renderSkillsList(){
+    const list = document.getElementById('skillsList');
+    if(!list) return;
+    list.innerHTML = '';
+    if(Skills.list.length === 0){
+      list.innerHTML = '<div class="skills-empty">No skills learned yet. The agent can add skills via learn_skill, or you can add one manually below.</div>';
+      return;
+    }
+    for(const s of Skills.list){
+      const item = document.createElement('div');
+      item.className = 'skill-item';
+      item.innerHTML = `
+        <div class="si-head">
+          <span class="si-name">${escapeHtml(s.name)}</span>
+          <span class="si-badge">${s.learnedBy === 'agent' ? 'learned' : 'manual'}</span>
+        </div>
+        <div class="si-desc">${escapeHtml(s.description || '(no description)')}</div>
+        <div class="si-actions">
+          <button class="si-btn" data-action="edit" data-id="${s.id}">Edit</button>
+          <button class="si-btn danger" data-action="delete" data-id="${s.id}">Delete</button>
+        </div>
+      `;
+      list.appendChild(item);
+    }
+    // wire up edit/delete
+    list.querySelectorAll('.si-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        const skill = Skills.get(id);
+        if(!skill) return;
+        if(action === 'delete'){
+          if(!confirm(`Delete skill "${skill.name}"?`)) return;
+          Skills.remove(id);
+          this.renderSkillsList();
+          this.log('info', `Skill "${skill.name}" deleted.`);
+        } else if(action === 'edit'){
+          // Edit via prompt() for simplicity (avoid another modal)
+          const name = prompt('Skill name:', skill.name);
+          if(name === null) return;
+          const description = prompt('Description (one sentence):', skill.description);
+          if(description === null) return;
+          const instructions = prompt('Instructions (the full skill text — uses \\n for newlines):', skill.instructions.replace(/\n/g, '\\n'));
+          if(instructions === null) return;
+          Skills.add({
+            name: name.trim(),
+            description: description.trim(),
+            instructions: instructions.replace(/\\n/g, '\n').trim(),
+            learnedBy: skill.learnedBy
+          });
+          this.renderSkillsList();
+          this.log('success', `Skill "${name.trim()}" updated.`);
+        }
+      });
+    });
+  }
+};
+
+// Local escapeHtml helper for UI module (Markdown module has its own)
+function escapeHtml(text){
+  const d = document.createElement('div');
+  d.textContent = text == null ? '' : String(text);
+  return d.innerHTML;
+}
+
+/* ---------------- 9. MARKDOWN PARSER ---------------- */
+const Markdown = {
+  parse(text){
+    if(!text) return '';
+    let html = this.escapeHtml(text);
+    const codeBlocks = [];
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (m, lang, code)=>{
+      const ph = '\x00CB'+codeBlocks.length+'\x00';
+      codeBlocks.push('<pre><code class="lang-'+lang+'">'+code.replace(/&amp;/g,'&')+'</code><span class="copy-code">Copy</span></pre>');
+      return ph;
+    });
+    html = html.replace(/^(\|.+\|)\n(\|[\s\-:|]+\|)\n((?:\|.+\|\n?)+)/gm, (m, header, sep, rows)=>{
+      const h = header.split('|').filter(c=>c.trim()).map(c=>'<th>'+c.trim()+'</th>').join('');
+      const r = rows.trim().split('\n').map(row=>'<tr>'+row.split('|').filter(c=>c.trim()).map(c=>'<td>'+c.trim()+'</td>').join('')+'</tr>').join('');
+      return '<table><thead><tr>'+h+'</tr></thead><tbody>'+r+'</tbody></table>';
+    });
+    html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(/(<blockquote>.*<\/blockquote>\n?)+/g, (m)=>'<blockquote>'+m.replace(/<\/?blockquote>/g,'').replace(/\n/g,'<br>')+'</blockquote>');
+    html = html.replace(/^---$/gm, '<hr>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, (m)=>'<ul>'+m+'</ul>');
+    const blocks = html.split(/\n\n+/);
+    html = blocks.map(b=>{
+      if(b.startsWith('\x00CB')) return b;
+      if(b.startsWith('<') && !b.startsWith('<li>')) return b;
+      if(b.trim()) return '<p>'+b.replace(/\n/g,'<br>')+'</p>';
+      return '';
+    }).join('\n');
+    html = html.replace(/<pre>([\s\S]*?)<\/pre>/g, (m,i)=>'<pre>'+i.replace(/<br>/g,'\n')+'</pre>');
+    html = html.replace(/<(h[123]|ul|ol|li|pre|blockquote|table)([^>]*)>([\s\S]*?)<\/\1>/g, (m,t,a,i)=>'<'+t+a+'>'+i.replace(/<br>/g,'\n')+'</'+t+'>');
+    codeBlocks.forEach((cb,i)=>{ html = html.replace('\x00CB'+i+'\x00', cb); });
+    return html;
+  },
+  escapeHtml(text){ const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+};
+
+/* ---------------- 10. SYNTAX HIGHLIGHTER ---------------- */
+const SyntaxHL = {
+  highlight(code, ext){
+    if(!code) return '';
+    let html = this.escape(code);
+    const lang = ext || this.detectLang(code);
+    if(lang === 'js' || lang === 'javascript') html = this.highlightJS(html);
+    else if(lang === 'html') html = this.highlightHTML(html);
+    else if(lang === 'css') html = this.highlightCSS(html);
+    else if(lang === 'json') html = this.highlightJSON(html);
+    else html = this.highlightJS(html);
+    return html;
+  },
+  detectLang(code){
+    const t = code.trim();
+    if(t.startsWith('<!DOCTYPE') || t.startsWith('<html') || t.startsWith('<')) return 'html';
+    if(t.startsWith('{') || t.startsWith('[')) return 'json';
+    if(/^\.[a-z]+\s*\{/.test(t) || /@media|@keyframes/.test(t)) return 'css';
+    return 'js';
+  },
+  escape(code){ return code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); },
+  highlightJS(html){
+    html = html.replace(/(\/\/[^\n]*)/g, '<span class="tk-cmt">$1</span>');
+    html = html.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="tk-cmt">$1</span>');
+    html = html.replace(/(`[^`]*`|"[^"]*"|'[^']*')/g, '<span class="tk-str">$1</span>');
+    const kws = ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','new','class','extends','super','this','typeof','instanceof','in','of','try','catch','finally','throw','async','await','yield','import','export','default','from','as','delete','void','null','undefined','true','false','static','get','set'];
+    html = html.replace(new RegExp('\\b(' + kws.join('|') + ')\\b','g'), '<span class="tk-kw">$1</span>');
+    html = html.replace(/\b(\d+\.?\d*)\b/g, '<span class="tk-num">$1</span>');
+    html = html.replace(/([a-zA-Z_$][\w$]*)\s*\(/g, '<span class="tk-fn">$1</span>(');
+    return html;
+  },
+  highlightHTML(html){
+    html = html.replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="tk-tag">$2</span>');
+    html = html.replace(/([\w-]+)(=)(&quot;|'|")/g, '<span class="tk-attr">$1</span>$2$3');
+    html = html.replace(/(&quot;[^&]*&quot;|"[^"]*"|'[^']*')/g, '<span class="tk-str">$1</span>');
+    html = html.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="tk-cmt">$1</span>');
+    return html;
+  },
+  highlightCSS(html){
+    html = html.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="tk-cmt">$1</span>');
+    html = html.replace(/([\w-]+)(\s*:)/g, '<span class="tk-prop">$1</span>$2');
+    html = html.replace(/("[^"]*"|'[^']*')/g, '<span class="tk-str">$1</span>');
+    html = html.replace(/@[\w-]+/g, '<span class="tk-kw">$&</span>');
+    html = html.replace(/\b(\d+\.?\d*)(px|em|rem|%|vh|vw|s|ms|deg)?\b/g, '<span class="tk-num">$1$2</span>');
+    return html;
+  },
+  highlightJSON(html){
+    html = html.replace(/"([^"]*)"(?:\s*:)/g, '<span class="tk-prop">"$1"</span>:');
+    html = html.replace(/"([^"]*)"/g, '<span class="tk-str">"$1"</span>');
+    html = html.replace(/\b(true|false|null)\b/g, '<span class="tk-kw">$1</span>');
+    html = html.replace(/\b(\d+\.?\d*)\b/g, '<span class="tk-num">$1</span>');
+    return html;
+  }
+};
+
+/* ---------------- 11. ZIP ENCODER ---------------- */
+const ZipEncoder = {
+  encode(files){
+    const fileNames = Object.keys(files);
+    const localParts = [], centralParts = [];
+    let offset = 0;
+    const enc = new TextEncoder();
+    const crcTable = (()=>{ const t = new Uint32Array(256); for(let i=0;i<256;i++){ let c=i; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[i]=c>>>0; } return t; })();
+    const crc32 = (bytes)=>{ let c=0xFFFFFFFF; for(let i=0;i<bytes.length;i++) c=crcTable[(c^bytes[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; };
+    const dt=((new Date().getHours()<<11)|(new Date().getMinutes()<<5)|(new Date().getSeconds()/2))&0xFFFF;
+    const dd=(((new Date().getFullYear()-1980)<<9)|((new Date().getMonth()+1)<<5)|new Date().getDate())&0xFFFF;
+    for(const name of fileNames){
+      const nb=enc.encode(name), db=enc.encode(files[name]), crc=crc32(db);
+      const lh=new ArrayBuffer(30+nb.length), lv=new DataView(lh);
+      lv.setUint32(0,0x04034b50,true); lv.setUint16(4,20,true); lv.setUint16(6,0,true); lv.setUint16(8,0,true);
+      lv.setUint16(10,dt,true); lv.setUint16(12,dd,true); lv.setUint32(14,crc,true);
+      lv.setUint32(18,db.length,true); lv.setUint32(22,db.length,true); lv.setUint16(26,nb.length,true); lv.setUint16(28,0,true);
+      const lb=new Uint8Array(lh); lb.set(nb,30);
+      localParts.push(lb, db);
+      const ch=new ArrayBuffer(46+nb.length), cv=new DataView(ch);
+      cv.setUint32(0,0x02014b50,true); cv.setUint16(4,20,true); cv.setUint16(6,20,true); cv.setUint16(8,0,true); cv.setUint16(10,0,true);
+      cv.setUint16(12,dt,true); cv.setUint16(14,dd,true); cv.setUint32(16,crc,true);
+      cv.setUint32(20,db.length,true); cv.setUint32(24,db.length,true); cv.setUint16(28,nb.length,true);
+      cv.setUint16(30,0,true); cv.setUint16(32,0,true); cv.setUint16(34,0,true); cv.setUint16(36,0,true);
+      cv.setUint32(38,0,true); cv.setUint32(42,offset,true);
+      const cba=new Uint8Array(ch); cba.set(nb,46);
+      centralParts.push(cba);
+      offset += lb.length + db.length;
+    }
+    const cdSize = centralParts.reduce((s,p)=>s+p.length,0);
+    const eocd=new ArrayBuffer(22), ev=new DataView(eocd);
+    ev.setUint32(0,0x06054b50,true); ev.setUint16(4,0,true); ev.setUint16(6,0,true);
+    ev.setUint16(8,fileNames.length,true); ev.setUint16(10,fileNames.length,true);
+    ev.setUint32(12,cdSize,true); ev.setUint32(16,offset,true); ev.setUint16(20,0,true);
+    const all=[...localParts, ...centralParts, new Uint8Array(eocd)];
+    const total=all.reduce((s,p)=>s+p.length,0);
+    const out=new Uint8Array(total); let pos=0;
+    for(const p of all){ out.set(p,pos); pos+=p.length; }
+    return new Blob([out], {type:'application/zip'});
+  }
+};
+
+/* ---------------- 12. EXPORT / IMPORT ---------------- */
+const Exporter = {
+  download(blob, filename){
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  },
+  downloadText(text, filename){ this.download(new Blob([text],{type:'text/plain'}), filename); },
+  exportZip(){
+    const files=State.vfs;
+    if(Object.keys(files).length===0){ UI.log('warn','No files to export'); return; }
+    this.download(ZipEncoder.encode(files), 'vecode-project.zip');
+    UI.log('success', 'Exported '+Object.keys(files).length+' files as zip');
+  },
+  exportBundled(){
+    const html=VFS.bundle();
+    if(!html){ UI.log('warn','No files to export'); return; }
+    this.downloadText(html, 'index.html');
+    UI.log('success', 'Exported bundled index.html');
+  },
+  exportJson(){
+    this.downloadText(JSON.stringify({__vecode:true,version:1,exportedAt:new Date().toISOString(),files:State.vfs},null,2), 'vecode-project.json');
+    UI.log('success', 'Exported project JSON');
+  },
+  exportCurrentFile(){
+    if(!State.activeFile||!State.vfs[State.activeFile]){ UI.log('warn','No file selected'); return; }
+    this.downloadText(State.vfs[State.activeFile], State.activeFile.split('/').pop());
+    UI.log('success', 'Downloaded file');
+  },
+  importJson(file){
+    const reader=new FileReader();
+    reader.onload=(e)=>{
+      try{
+        const data=JSON.parse(e.target.result);
+        if(!data.__vecode) throw new Error('Not a Vecode project file');
+        State.vfs=data.files||{}; State.activeFile=null;
+        UI.renderFileTree(); UI.renderCodeView(null); UI.renderPreview();
+        UI.log('success', 'Imported '+Object.keys(State.vfs).length+' files');
+      }catch(err){ UI.log('error', 'Import failed: '+err.message); }
+    };
+    reader.readAsText(file);
+  }
+};
+
+/* ---------------- 12b. CONFIG CODE (base64 export/import of full state) ---------------- */
+const CONFIG_PREFIX = 'vecode-config:';
+const ConfigCode = {
+  // UTF-8 safe base64 encode/decode
+  encode(str){
+    return btoa(unescape(encodeURIComponent(str)));
+  },
+  decode(b64){
+    return decodeURIComponent(escape(atob(b64)));
+  },
+  // Build the config payload based on selected options
+  buildPayload(opts){
+    const payload = { __vecode_config: true, version: 1, exportedAt: new Date().toISOString() };
+    if(opts.theme) payload.theme = State.settings.theme || 'carbon';
+    if(opts.settings){
+      payload.settings = {
+        endpoint: State.settings.endpoint,
+        model: State.settings.model,
+        temperature: State.settings.temperature,
+        systemPrompt: State.settings.systemPrompt
+      };
+      if(opts.apiKey) payload.settings.apiKey = State.settings.apiKey;
+    }
+    if(opts.files) payload.files = {...State.vfs};
+    if(opts.skills) payload.skills = [...Skills.list];
+    return payload;
+  },
+  generate(opts){
+    const payload = this.buildPayload(opts);
+    const json = JSON.stringify(payload);
+    const b64 = this.encode(json);
+    return CONFIG_PREFIX + b64;
+  },
+  parse(code){
+    code = (code || '').trim();
+    if(!code.startsWith(CONFIG_PREFIX)) throw new Error('Not a Vecode config code (must start with "vecode-config:")');
+    const b64 = code.slice(CONFIG_PREFIX.length).trim();
+    let json;
+    try { json = this.decode(b64); }
+    catch(e){ throw new Error('Could not decode base64: ' + e.message); }
+    let payload;
+    try { payload = JSON.parse(json); }
+    catch(e){ throw new Error('Could not parse config JSON: ' + e.message); }
+    if(!payload || !payload.__vecode_config) throw new Error('Invalid config payload');
+    return payload;
+  },
+  apply(payload){
+    const applied = [];
+    if(payload.theme){
+      Settings.applyTheme(payload.theme);
+      Settings.save();
+      applied.push('theme');
+    }
+    if(payload.settings){
+      if(payload.settings.endpoint) State.settings.endpoint = payload.settings.endpoint;
+      if(payload.settings.model) State.settings.model = payload.settings.model;
+      if(typeof payload.settings.temperature === 'number') State.settings.temperature = payload.settings.temperature;
+      if(payload.settings.systemPrompt) State.settings.systemPrompt = payload.settings.systemPrompt;
+      if(payload.settings.apiKey) State.settings.apiKey = payload.settings.apiKey;
+      Settings.save();
+      applied.push('settings' + (payload.settings.apiKey ? ' (with API key)' : ''));
+    }
+    if(payload.files && typeof payload.files === 'object'){
+      State.vfs = {...payload.files};
+      State.activeFile = null;
+      UI.renderFileTree(); UI.renderCodeView(null); UI.renderPreview();
+      applied.push(Object.keys(payload.files).length + ' files');
+    }
+    if(Array.isArray(payload.skills)){
+      payload.skills.forEach(s => Skills.add(s));
+      UI.renderSkillsList();
+      applied.push(payload.skills.length + ' skills');
+    }
+    UI.updateModelPill();
+    UI.updateApiStatus();
+    return applied;
+  },
+  // Show either the export or import view of the modal
+  openExport(){
+    document.getElementById('configModalTitle').textContent = 'Export Config Code';
+    document.getElementById('configExportView').style.display = '';
+    document.getElementById('configImportView').style.display = 'none';
+    document.getElementById('configOverlay').classList.add('active');
+    // reset
+    document.getElementById('configCodeOut').value = '';
+    document.getElementById('configStats').textContent = '';
+    document.getElementById('configWarn').style.display = 'none';
+    document.getElementById('optApiKey').checked = false;
+  },
+  openImport(){
+    document.getElementById('configModalTitle').textContent = 'Import Config Code';
+    document.getElementById('configExportView').style.display = 'none';
+    document.getElementById('configImportView').style.display = '';
+    document.getElementById('configOverlay').classList.add('active');
+    document.getElementById('configCodeIn').value = '';
+    document.getElementById('configCodeIn').focus();
+  },
+  close(){ document.getElementById('configOverlay').classList.remove('active'); },
+  generateFromUI(){
+    const opts = {
+      theme: document.getElementById('optTheme').checked,
+      settings: document.getElementById('optSettings').checked,
+      apiKey: document.getElementById('optApiKey').checked,
+      files: document.getElementById('optFiles').checked,
+      skills: document.getElementById('optSkills').checked
+    };
+    if(!opts.theme && !opts.settings && !opts.files && !opts.skills){
+      UI.log('warn', 'Select at least one thing to include in the config code.');
+      return;
+    }
+    try {
+      const code = this.generate(opts);
+      document.getElementById('configCodeOut').value = code;
+      document.getElementById('configWarn').style.display = opts.apiKey ? 'block' : 'none';
+      const stats = [];
+      if(opts.theme) stats.push('theme');
+      if(opts.settings) stats.push(opts.apiKey ? 'settings+key' : 'settings');
+      if(opts.files) stats.push(Object.keys(State.vfs).length + ' files');
+      if(opts.skills) stats.push(Skills.list.length + ' skills');
+      document.getElementById('configStats').textContent = `Size: ${(code.length/1024).toFixed(1)} KB · Includes: ${stats.join(', ')}`;
+      UI.log('success', 'Config code generated (' + (code.length/1024).toFixed(1) + ' KB)');
+    } catch(e){
+      UI.log('error', 'Failed to generate config: ' + e.message);
+    }
+  },
+  applyFromUI(){
+    const code = document.getElementById('configCodeIn').value.trim();
+    if(!code){ UI.log('warn', 'Paste a config code first.'); return; }
+    let payload;
+    try { payload = this.parse(code); }
+    catch(e){ UI.log('error', 'Invalid config code: ' + e.message); return; }
+    if(!confirm('This will replace your current ' +
+        (payload.theme ? 'theme, ' : '') +
+        (payload.settings ? 'API settings, ' : '') +
+        (payload.files ? 'files, ' : '') +
+        (payload.skills ? 'skills, ' : '') +
+        'with the contents of the config code. Continue?')) return;
+    const applied = this.apply(payload);
+    this.close();
+    UI.log('success', 'Config applied: ' + applied.join(', '));
+    UI.addMessage('system', '✓ Config code applied: ' + applied.join(', ') + '. Ready to use.');
+  },
+  copyToClipboard(){
+    const code = document.getElementById('configCodeOut').value;
+    if(!code){ UI.log('warn', 'Generate a code first.'); return; }
+    navigator.clipboard.writeText(code).then(()=>{
+      UI.log('success', 'Config code copied to clipboard (' + (code.length/1024).toFixed(1) + ' KB)');
+      const btn = document.getElementById('configCopy');
+      const orig = btn.textContent; btn.textContent = 'Copied!';
+      setTimeout(()=>btn.textContent = orig, 1500);
+    }).catch(()=>UI.log('error', 'Clipboard write failed.'));
+  },
+  downloadAsText(){
+    const code = document.getElementById('configCodeOut').value;
+    if(!code){ UI.log('warn', 'Generate a code first.'); return; }
+    Exporter.downloadText(code, 'vecode-config.txt');
+    UI.log('success', 'Config code downloaded as vecode-config.txt');
+  }
+};
+
+/* ---------------- 12c. FILE IMPORTER (multi-file from disk) ---------------- */
+const FileImporter = {
+  // Open the OS file picker — accepts any file type
+  pick(){
+    const fi = document.createElement('input');
+    fi.type = 'file';
+    fi.multiple = true;
+    fi.accept = '.html,.htm,.css,.js,.mjs,.ts,.jsx,.tsx,.json,.md,.txt,.svg,.xml,.yml,.yaml,.csv,.py,.rb,.php,.go,.rs,.java,.c,.cpp,.h,.sh,.env,.gitignore,.toml,.ini,.conf';
+    fi.addEventListener('change', ()=>{
+      if(fi.files && fi.files.length > 0) this.importFiles(fi.files);
+    });
+    fi.click();
+  },
+  // Import a FileList into the VFS
+  async importFiles(fileList){
+    const files = Array.from(fileList);
+    if(files.length === 0) return;
+    UI.log('info', `Importing ${files.length} file${files.length!==1?'s':''}...`);
+    let imported = 0, skipped = 0;
+    for(const file of files){
+      try {
+        // Use just the filename (strip directory paths from webkitRelativePath if present)
+        const path = file.webkitRelativePath || file.name;
+        // If it's a relative path with directories, keep them
+        const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+        // Skip directories (size 0 and name ends with /)
+        if(file.size === 0 && file.type === '') { skipped++; continue; }
+        const text = await file.text();
+        VFS.write(cleanPath, text);
+        UI.log('success', `✓ Imported ${cleanPath} (${text.length} bytes)`);
+        imported++;
+      } catch(err){
+        UI.log('error', `Failed to import ${file.name}: ${err.message}`);
+        skipped++;
+      }
+    }
+    // Auto-select the first imported file
+    if(imported > 0){
+      const firstPath = (files[0].webkitRelativePath || files[0].name);
+      const cleanFirst = firstPath.startsWith('/') ? firstPath.slice(1) : firstPath;
+      if(State.vfs[cleanFirst]){
+        State.activeFile = cleanFirst;
+        UI.renderFileTree();
+        UI.renderCodeView(cleanFirst);
+      } else {
+        UI.renderFileTree();
+      }
+    }
+    UI.log('info', `Import done: ${imported} imported, ${skipped} skipped.`);
+    UI.addMessage('system', `📁 Imported ${imported} file${imported!==1?'s':''} into the VFS.`);
+  },
+  // Drag-and-drop setup — call once on init
+  setupDragDrop(){
+    const overlay = document.getElementById('dropOverlay');
+    let dragCounter = 0;
+    window.addEventListener('dragenter', (e)=>{
+      if(!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes('Files')) return;
+      e.preventDefault();
+      dragCounter++;
+      overlay.classList.add('active');
+    });
+    window.addEventListener('dragleave', (e)=>{
+      if(!e.dataTransfer) return;
+      dragCounter--;
+      if(dragCounter <= 0){ dragCounter = 0; overlay.classList.remove('active'); }
+    });
+    window.addEventListener('dragover', (e)=>{
+      if(e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')){
+        e.preventDefault();
+      }
+    });
+    window.addEventListener('drop', (e)=>{
+      if(!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+      e.preventDefault();
+      dragCounter = 0;
+      overlay.classList.remove('active');
+      this.importFiles(e.dataTransfer.files);
+    });
+  }
+};
+
+/* ---------------- 13. EVENT WIRING & BOOT ---------------- */
+/* ---------- Empty-state hero with starter prompt chips ---------- */
+const STARTER_PROMPTS = [
+  'Build a todo app with localStorage',
+  'Create an animated counter',
+  'Make a pomodoro timer with sound',
+  'Build a color palette generator',
+  'Create a markdown previewer',
+  'Make a dice roller game',
+  'Build a calculator with keyboard support',
+  'Create a typing speed test'
+];
+function renderEmptyChatHero(){
+  const log = document.getElementById('chatLog');
+  if(!log) return;
+  // Don't re-render if there are already messages
+  if(State.messages.length > 0) return;
+  log.innerHTML = '';
+  const hero = document.createElement('div');
+  hero.className = 'chat-empty-hero';
+  const isConfigured = Settings.isConfigured();
+  hero.innerHTML = `
+    <div class="big">${isConfigured ? 'Ready to build' : 'Welcome to Vecode'}</div>
+    <div class="sub">${isConfigured
+      ? 'Describe what you want to build, or click a starter prompt below.'
+      : 'Click <strong>⚙ Settings</strong> to add your API key — or try a <strong>free</strong> provider like Groq or HuggingFace. See <strong>Help → Free APIs</strong> for details.'}</div>
+    <div>${STARTER_PROMPTS.map(p=>`<span class="prompt-chip" data-prompt="${p.replace(/"/g,'&quot;')}">${p}</span>`).join('')}</div>
+  `;
+  log.appendChild(hero);
+  hero.querySelectorAll('.prompt-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const p = chip.dataset.prompt;
+      const input = document.getElementById('chatInput');
+      input.value = p;
+      input.focus();
+      input.dispatchEvent(new Event('input'));
+    });
+  });
+}
+
+function init(){
+  Settings.load();
+  Skills.load();   // ← load learned skills from localStorage
+  UI.updateModelPill(); UI.updateApiStatus();
+  UI.renderFileTree(); UI.renderCodeView(null); UI.renderPreview(); UI.setRunning(false);
+  renderEmptyChatHero();
+  UI.log('info', 'Vecode initialized — AI coding agent in your browser.');
+  if(Skills.list.length > 0){
+    UI.log('info', `${Skills.list.length} learned skill${Skills.list.length!==1?'s':''} loaded. Manage them in Settings.`);
+  }
+  if(Settings.isConfigured()){
+    UI.log('success', `Connected to ${State.settings.model} @ ${State.settings.endpoint.replace(/^https?:\/\//,'').split('/')[0]}`);
+    UI.log('info', 'Tip: click a starter prompt below, or just type a request. Drop files anywhere to import them.');
+  } else {
+    UI.log('warn', 'No API key configured. Click Settings, or Help → Free APIs for free options.');
+    UI.log('info', 'Tip: drop files anywhere on the window to import them into the VFS.');
+  }
+
+  const input=document.getElementById('chatInput');
+  const sendBtn=document.getElementById('sendBtn'), stopBtn=document.getElementById('stopBtn');
+  const send=()=>{
+    const text=input.value.trim();
+    if(!text||State.isRunning) return;
+    if(!Settings.isConfigured()){ UI.openSettings(); return; }
+    input.value=''; input.style.height='auto';
+    Agent.run(text);
+  };
+  sendBtn.addEventListener('click', send);
+  stopBtn.addEventListener('click', ()=>Agent.stop());
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
+  input.addEventListener('input', ()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px'; });
+
+  document.getElementById('clearBtn').addEventListener('click', ()=>{ if(State.isRunning) return; UI.clearChat(); State.messages=[]; UI.log('info','Chat cleared.'); });
+
+  // modals
+  document.getElementById('settingsBtn').addEventListener('click', ()=>UI.openSettings());
+  document.getElementById('closeModal').addEventListener('click', ()=>UI.closeSettings());
+  document.getElementById('cancelSettings').addEventListener('click', ()=>UI.closeSettings());
+  document.getElementById('saveSettings').addEventListener('click', ()=>UI.saveSettings());
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') UI.closeSettings(); });
+  document.getElementById('helpBtn').addEventListener('click', ()=>document.getElementById('helpOverlay').classList.add('active'));
+  document.getElementById('closeHelp').addEventListener('click', ()=>document.getElementById('helpOverlay').classList.remove('active'));
+  document.getElementById('closeHelpBtn').addEventListener('click', ()=>document.getElementById('helpOverlay').classList.remove('active'));
+  document.getElementById('helpOverlay').addEventListener('click', (e)=>{ if(e.target.id==='helpOverlay') document.getElementById('helpOverlay').classList.remove('active'); });
+
+  // theme cards
+  document.querySelectorAll('.theme-card').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      Settings.applyTheme(c.dataset.theme);
+      UI.updateThemeSelection();
+      Settings.save();
+    });
+  });
+
+  // presets
+  document.querySelectorAll('.preset-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.getElementById('setEndpoint').value=chip.dataset.ep;
+      if(chip.dataset.model) document.getElementById('setModel').value=chip.dataset.model;
+      // mark active
+      document.querySelectorAll('.preset-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      // show the key-hint callout
+      const hint = document.getElementById('presetHint');
+      if(chip.dataset.keyHint){
+        hint.textContent = '🔑 ' + chip.dataset.keyHint;
+        hint.style.display = 'block';
+      } else { hint.style.display = 'none'; }
+    });
+  });
+
+  // API key visibility toggle
+  const toggleVis = document.getElementById('toggleKeyVis');
+  if(toggleVis){
+    toggleVis.addEventListener('click', ()=>{
+      const inp = document.getElementById('setApiKey');
+      if(inp.type === 'password'){ inp.type = 'text'; toggleVis.textContent = 'hide'; }
+      else { inp.type = 'password'; toggleVis.textContent = 'show'; }
+    });
+  }
+
+  // Help tabs
+  document.querySelectorAll('.help-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.help-tab').forEach(t=>t.classList.toggle('active', t===tab));
+      document.querySelectorAll('.help-section').forEach(s=>{
+        s.classList.toggle('active', s.dataset.tab === target);
+      });
+    });
+  });
+
+  // ESC closes any modal
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+      document.getElementById('modalOverlay').classList.remove('active');
+      document.getElementById('helpOverlay').classList.remove('active');
+      document.getElementById('configOverlay').classList.remove('active');
+      document.getElementById('exportMenu').classList.remove('active');
+    }
+  });
+
+  // Chat empty-state hero with prompt chips (only render once on init)
+  renderEmptyChatHero();
+
+  // preview
+  document.getElementById('refreshPreview').addEventListener('click', ()=>{ UI.renderPreview(); UI.log('info','Preview refreshed.'); });
+  document.getElementById('openTab').addEventListener('click', ()=>UI.openPreviewTab());
+  document.getElementById('consoleClear').addEventListener('click', ()=>UI.clearConsole());
+
+  // new project
+  document.getElementById('newProjectBtn').addEventListener('click', ()=>{
+    if(State.isRunning) return;
+    if(Object.keys(State.vfs).length>0 && !confirm('Clear all files and start a new project?')) return;
+    VFS.clear(); UI.clearChat(); State.messages=[]; UI.clearConsole();
+    UI.log('info', 'New project started.');
+  });
+
+  // export menu
+  const exportBtn=document.getElementById('exportBtn'), exportMenu=document.getElementById('exportMenu');
+  exportBtn.addEventListener('click', (e)=>{ e.stopPropagation(); exportMenu.classList.toggle('active'); });
+  document.addEventListener('click', ()=>exportMenu.classList.remove('active'));
+  exportMenu.addEventListener('click', (e)=>e.stopPropagation());
+  document.querySelectorAll('.export-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      exportMenu.classList.remove('active');
+      const t=item.dataset.export;
+      if(t==='zip') Exporter.exportZip();
+      else if(t==='single') Exporter.exportBundled();
+      else if(t==='json') Exporter.exportJson();
+      else if(t==='file') Exporter.exportCurrentFile();
+      else if(t==='import'){ const fi=document.createElement('input'); fi.type='file'; fi.accept='.json'; fi.addEventListener('change', ()=>{ if(fi.files[0]) Exporter.importJson(fi.files[0]); }); fi.click(); }
+      else if(t==='import-files') FileImporter.pick();
+      else if(t==='config-export') ConfigCode.openExport();
+      else if(t==='config-import') ConfigCode.openImport();
+    });
+  });
+
+  // config code modal
+  document.getElementById('closeConfig').addEventListener('click', ()=>ConfigCode.close());
+  document.getElementById('configOverlay').addEventListener('click', (e)=>{ if(e.target.id==='configOverlay') ConfigCode.close(); });
+  document.getElementById('configGenerate').addEventListener('click', ()=>ConfigCode.generateFromUI());
+  document.getElementById('configCopy').addEventListener('click', ()=>ConfigCode.copyToClipboard());
+  document.getElementById('configDownload').addEventListener('click', ()=>ConfigCode.downloadAsText());
+  document.getElementById('configApply').addEventListener('click', ()=>ConfigCode.applyFromUI());
+  document.getElementById('configCancel').addEventListener('click', ()=>ConfigCode.close());
+  document.getElementById('optApiKey').addEventListener('change', (e)=>{
+    // If user checks "include API key" but no key is set, warn
+    if(e.target.checked && !State.settings.apiKey){
+      UI.log('warn', 'No API key is currently set — the config code will not contain one.');
+    }
+  });
+
+  // skills add row
+  const skillAddBtn = document.getElementById('skillAddBtn');
+  if(skillAddBtn){
+    skillAddBtn.addEventListener('click', ()=>{
+      const name = document.getElementById('skillAddName').value.trim();
+      const desc = document.getElementById('skillAddDesc').value.trim();
+      if(!name){ UI.log('warn','Skill name required.'); return; }
+      const instructions = prompt('Enter the full skill instructions (what to do, how to think, what to produce). Use \\n for newlines:');
+      if(instructions === null) return;
+      const cleaned = instructions.replace(/\\n/g, '\n').trim();
+      if(!cleaned){ UI.log('warn','Skill instructions required.'); return; }
+      Skills.add({name, description:desc, instructions:cleaned, learnedBy:'manual'});
+      document.getElementById('skillAddName').value = '';
+      document.getElementById('skillAddDesc').value = '';
+      UI.renderSkillsList();
+      UI.log('success', `Skill "${name}" added.`);
+    });
+  }
+
+  // file drag-and-drop
+  FileImporter.setupDragDrop();
+
+  // file actions
+  document.getElementById('faCopy').addEventListener('click', ()=>{
+    if(!State.activeFile||!State.vfs[State.activeFile]) return;
+    navigator.clipboard.writeText(State.vfs[State.activeFile]).then(()=>{
+      document.getElementById('faCopy').textContent='Copied!';
+      setTimeout(()=>document.getElementById('faCopy').textContent='Copy', 1500);
+      UI.log('info', 'Copied to clipboard');
+    });
+  });
+  document.getElementById('faDownload').addEventListener('click', ()=>Exporter.exportCurrentFile());
+  document.getElementById('faDelete').addEventListener('click', ()=>{ if(State.activeFile) VFS.delete(State.activeFile); });
+
+  // mobile tab bar
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>UI.switchMobilePane(btn.dataset.pane));
+  });
+
+  Sandbox.init();
+  window.addEventListener('beforeunload', ()=>{
+    Sandbox.terminate();
+    const frame = document.getElementById('previewFrame');
+    if(frame && frame._blobUrl) URL.revokeObjectURL(frame._blobUrl);
+  });
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+</script>
+</body>
+</html>
