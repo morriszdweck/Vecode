@@ -15,6 +15,11 @@ You can try Vecode today by two methods:
 2: go to https://vecode.netlify.app
 
 ### Features
+- self improvment with self learning skills
+- tools (coming soon) for agentic work
+- import files by just dragging and dropping
+- simple and easy to understand UI.
+- Export and import data via codes.
 
 
 reccomended APIs: https://github.com/YoannDev90/awesome-free-ai-api
