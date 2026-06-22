@@ -1,7 +1,5 @@
 # Vecode
 An open source, in browser AI coding agent that is simple to use.
-still in beta.
-
 
 ### What is Vecode?
 Built with GLM 5.2 in OpenCode, and via z.ai's offical agent on their chat interface, Vecode is the easiest to use AI coding agent. It works with BYOK (Bring your own key) twith a detailed explanation on how to use it and what free AI APIs there are to use. It's Simple to use for beginners, works entirely within your browser with a virtual file system, and doesn't require installations or complex setups.
