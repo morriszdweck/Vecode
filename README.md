@@ -1,6 +1,6 @@
 # Vecode
 
-### New Vecode coming soon, hopefully... Still simple and easy to use, Browser based, and more.
+### New Vecode coming soon, hopefully... Still simple and easy to use, Browser based, and more- website builder.
 
 An open source, in browser AI coding agent that is simple to use.
 
