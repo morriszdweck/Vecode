@@ -1,4 +1,7 @@
 # Vecode
+
+### New Vecode coming soon, hopefully...
+
 An open source, in browser AI coding agent that is simple to use.
 
 ### What is Vecode?
