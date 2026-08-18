@@ -134,25 +134,88 @@
   }
 
   /* ---------------- SSE parsing ---------------- */
+  function fallbackTextDecoder() {
+    let carry = [];
+    return {
+      decode(value, options) {
+        const incoming = value ? Array.from(value) : [];
+        const bytes = carry.concat(incoming);
+        carry = [];
+        const stream = !!(options && options.stream);
+        let out = "";
+        for (let i = 0; i < bytes.length;) {
+          const b0 = bytes[i];
+          if (b0 < 0x80) { out += String.fromCharCode(b0); i++; continue; }
+          let need = 0;
+          let code = 0;
+          if (b0 >= 0xc2 && b0 <= 0xdf) { need = 1; code = b0 & 0x1f; }
+          else if (b0 >= 0xe0 && b0 <= 0xef) { need = 2; code = b0 & 0x0f; }
+          else if (b0 >= 0xf0 && b0 <= 0xf4) { need = 3; code = b0 & 0x07; }
+          else { out += "\ufffd"; i++; continue; }
+          if (i + need >= bytes.length) {
+            if (stream) carry = bytes.slice(i);
+            else out += "\ufffd";
+            break;
+          }
+          let valid = true;
+          for (let j = 1; j <= need; j++) {
+            const b = bytes[i + j];
+            if ((b & 0xc0) !== 0x80) { valid = false; break; }
+            code = (code << 6) | (b & 0x3f);
+          }
+          const overlong = (need === 2 && code < 0x800) || (need === 3 && code < 0x10000);
+          if (!valid || overlong || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)) {
+            out += "\ufffd";
+            i++;
+            continue;
+          }
+          if (code <= 0xffff) out += String.fromCharCode(code);
+          else {
+            code -= 0x10000;
+            out += String.fromCharCode(0xd800 + (code >> 10), 0xdc00 + (code & 0x3ff));
+          }
+          i += need + 1;
+        }
+        return out;
+      }
+    };
+  }
+
+  function makeTextDecoder() {
+    const Decoder = (typeof window !== "undefined" && window.TextDecoder)
+      || (typeof TextDecoder !== "undefined" && TextDecoder);
+    return Decoder ? new Decoder() : fallbackTextDecoder();
+  }
+
   async function readSSE(res, onEvent) {
     const reader = res.body.getReader();
-    const decoder = new TextDecoder();
+    const decoder = makeTextDecoder();
     let buf = "";
+
+    function consumeLine(line) {
+      line = line.replace(/\r$/, "");
+      if (!line.startsWith("data:")) return false;
+      const payload = line.slice(5).trim();
+      if (payload === "[DONE]") return true;
+      let event;
+      try { event = JSON.parse(payload); } catch (e) { return false; }
+      onEvent(event);
+      return false;
+    }
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       buf += decoder.decode(value, { stream: true });
       let idx;
       while ((idx = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, idx).replace(/\r$/, "");
+        const line = buf.slice(0, idx);
         buf = buf.slice(idx + 1);
-        if (line.startsWith("data:")) {
-          const payload = line.slice(5).trim();
-          if (payload === "[DONE]") return;
-          try { onEvent(JSON.parse(payload)); } catch (e) { /* ignore malformed */ }
-        }
+        if (consumeLine(line)) return;
       }
     }
+    buf += decoder.decode();
+    if (buf && consumeLine(buf)) return;
   }
 
   function extractApiError(body, fallback) {

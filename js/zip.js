@@ -31,8 +31,37 @@
     return Uint8Array.from(out.flat());
   }
 
+  function decodeBase64(input) {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const clean = String(input).replace(/\s/g, "").replace(/=+$/, "");
+    const out = [];
+    let buffer = 0;
+    let bits = 0;
+    for (const char of clean) {
+      const value = alphabet.indexOf(char);
+      if (value < 0) throw new Error("Invalid base64 data URI");
+      buffer = (buffer << 6) | value;
+      bits += 6;
+      if (bits >= 8) {
+        bits -= 8;
+        out.push((buffer >> bits) & 0xff);
+      }
+    }
+    return Uint8Array.from(out);
+  }
+
+  function contentBytes(value) {
+    if (typeof value !== "string") return value;
+    const match = value.match(/^data:([^,]*?),(.*)$/is);
+    if (!match) return encodeText(value);
+    if (/;base64(?:;|$)/i.test(match[1])) return decodeBase64(match[2]);
+    try { return encodeText(decodeURIComponent(match[2])); }
+    catch (e) { return encodeText(match[2]); }
+  }
+
   /**
    * Build a ZIP from { filename: string|Uint8Array } — returns a Blob.
+   * Base64 data-URI values (used by binary imports) are decoded to raw bytes.
    * Uses STORE (no compression) so it is fast and dependency-free.
    */
   function makeZip(files) {
@@ -42,9 +71,10 @@
     const entries = Object.keys(files).sort();
 
     for (const name of entries) {
-      const data = typeof files[name] === "string" ? encodeText(files[name]) : files[name];
+      const data = contentBytes(files[name]);
       const nameBytes = encodeText(name);
       const crc = crc32(data);
+      const localOffset = offset;
 
       // Local file header
       const local = new Uint8Array(30 + nameBytes.length);
@@ -81,8 +111,8 @@
       cd.setUint16(32, 0, true);
       cd.setUint16(34, 0, true);
       cd.setUint16(36, 0, true);
-      cd.setUint32(38, 0, true); // local header offset
-      cd.setUint32(42, 0, true);
+      cd.setUint32(38, 0, true); // external attributes
+      cd.setUint32(42, localOffset, true); // relative local-header offset
       cen.set(nameBytes, 46);
       central.push(cen);
       offset += local.length + data.length;
@@ -113,5 +143,5 @@
   }
 
   window.Vecode = window.Vecode || {};
-  window.Vecode.Zip = { makeZip, downloadBlob };
+  window.Vecode.Zip = { makeZip, downloadBlob, contentBytes };
 })();

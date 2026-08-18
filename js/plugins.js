@@ -46,8 +46,23 @@
     analytics: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 13.5h12"/><rect x="3" y="8.5" width="2.4" height="5" rx=".6"/><rect x="6.8" y="5.5" width="2.4" height="8" rx=".6"/><rect x="10.6" y="2.5" width="2.4" height="11" rx=".6"/></svg>',
     a11y: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="5" r="2.4"/><path d="M3 14c.6-3 2.6-4.5 5-4.5s4.4 1.5 5 4.5"/></svg>',
     pwa: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="1.5" width="10" height="13" rx="2"/><path d="M6.5 12.5h3"/></svg>',
+    faq: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 3.5h11v8h-6l-3.5 2v-2H2.5z"/><path d="M6.2 6.1A2 2 0 0 1 8 5c1.1 0 1.9.6 1.9 1.5 0 1.4-1.9 1.4-1.9 2.5M8 10.6h.01"/></svg>',
+    performance: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.3 11.5a6 6 0 1 1 11.4 0"/><path d="m8 8 3-2.2"/><path d="M4.5 12.5h7"/></svg>',
     skill: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M8 1.5 9.7 6.3 14.5 8 9.7 9.7 8 14.5 6.3 9.7 1.5 8 6.3 6.3Z" opacity=".4"/><path d="M12.5 11l.8 1.7 1.7.8-1.7.8-.8 1.7-.8-1.7-1.7-.8 1.7-.8Z"/></svg>'
   };
+
+  const markerStart = (id) => `<!-- vecode:plugin:${id} -->`;
+  const markerEnd = (id) => `<!-- /vecode:plugin:${id} -->`;
+  const marked = (id, content) => markerStart(id) + "\n" + content + "\n" + markerEnd(id);
+  const escapeAttr = (value) => String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  // Managed plugin code is always enclosed by markers so a toggle is fully
+  // reversible. This intentionally strips every plugin before reapplying the
+  // enabled set; it also makes option changes and repeated runs idempotent.
+  function stripPluginMarkers(content) {
+    if (typeof content !== "string") return content;
+    return content.replace(/<!--\s*vecode:plugin:([a-z0-9_-]+)\s*-->[\s\S]*?<!--\s*\/vecode:plugin:\1\s*-->\s*/gi, "");
+  }
 
   /* ---------- the registry ---------- */
   const PLUGINS = [
@@ -71,21 +86,15 @@
         const links = `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=${p.weights}&display=swap" rel="stylesheet">`;
-        let out = html;
-        if (!out.includes("fonts.googleapis.com")) {
-          out = out.replace(/<head>([\s\S]*?)(?=<body|<\/head>)/, (m, inner) => {
-            return "<head>" + links + "\n" + inner;
-          });
-        }
         const cssVarBlock = `<style>
 :root {
   ${p.css}
 }
 </style>`;
-        if (!out.includes("--font-editorial")) {
-          out = out.replace(/<\/head>/, cssVarBlock + "\n</head>");
-        }
-        files["index.html"] = out;
+        const parts = [];
+        if (!html.includes("fonts.googleapis.com")) parts.push(links);
+        if (!html.includes("--font-editorial")) parts.push(cssVarBlock);
+        if (parts.length) files["index.html"] = html.replace(/<\/head>/i, marked("typography", parts.join("\n")) + "\n</head>");
         return files;
       }
     },
@@ -99,8 +108,8 @@
       inject: (files) => {
         const html = files["index.html"] || "";
         if (!html) return files;
-        if (!html.includes('name="color-scheme"')) {
-          files["index.html"] = html.replace(/<head>/, '<head>\n<meta name="color-scheme" content="light dark">');
+        if (!/<meta\b[^>]*name=["']color-scheme["']/i.test(html)) {
+          files["index.html"] = html.replace(/<head\b[^>]*>/i, (head) => head + "\n" + marked("darkmode", '<meta name="color-scheme" content="light dark">'));
         }
         return files;
       }
@@ -128,13 +137,9 @@
   }, { threshold: 0.12 });
   els.forEach(function (el) { io.observe(el); });
 })();`;
-        if (!html.includes("data-reveal")) {
-          // add CSS + helper script before </body>
-          const css = `<style>[data-reveal]{opacity:0;transform:translateY(10px);transition:opacity .3s ease,transform .3s ease}[data-reveal].revealed{opacity:1;transform:none}@media (prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none;transition:none}}</style>`;
-          let out = html.replace(/<\/head>/, css + "\n</head>");
-          out = out.replace(/<\/body>/, "<script>" + helper + "</" + "script>\n</body>");
-          files["index.html"] = out;
-        }
+        const css = `<style>[data-reveal]{opacity:0;transform:translateY(10px);transition:opacity .3s ease,transform .3s ease}[data-reveal].revealed{opacity:1;transform:none}@media (prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none;transition:none}}</style>`;
+        const block = marked("motion", css + "\n<script>" + helper + "</" + "script>");
+        files["index.html"] = html.replace(/<\/body>/i, block + "\n</body>");
         return files;
       }
     },
@@ -153,19 +158,11 @@
       tagline: "Meta tags, Open Graph and structured data",
       icon: ICONS.seo,
       default: true,
-      prompt: () => `SEO plugin is ON. Every page gets: a unique descriptive <title> (under 60 chars), meta description (under 160 chars), canonical link, Open Graph tags (og:title, og:description, og:type, og:image with an absolute URL placeholder), twitter:card, and JSON-LD structured data matching the page type (e.g. Organization, Product, BlogPosting). Use semantic heading hierarchy.`,
-      inject: (files) => {
-        const html = files["index.html"] || "";
-        if (!html || html.includes('name="description"')) return files;
-        const head = `<meta name="description" content="Describe what this site offers, in one plain sentence under 160 characters.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Site name">
-<meta property="og:description" content="Describe what this site offers, in one plain sentence.">
-<meta property="og:image" content="https://your-site.netlify.app/og-cover.png">
-<meta name="twitter:card" content="summary_large_image">`;
-        files["index.html"] = html.replace(/<head>/, "<head>\n" + head);
-        return files;
-      }
+      prompt: () => `SEO plugin is ON. Give every page a unique descriptive <title> (under 60 chars) and a truthful meta description (under 160 chars). Add accurate Open Graph, Twitter card, canonical and JSON-LD data when the project supplies the real values. Never write "Site name", "Describe this site", example domains, fake image URLs, or other placeholder metadata. Use a semantic heading hierarchy.`,
+      reviewItems: [
+        "Titles and descriptions are specific to the real page content",
+        "SEO metadata contains no placeholder copy, fake domains, or invented image URLs"
+      ]
     },
     {
       id: "analytics",
@@ -179,10 +176,10 @@
       inject: (files, opts) => {
         const html = files["index.html"] || "";
         if (!html) return files;
-        const domain = (opts && opts.domain) || "your-site.netlify.app";
+        const domain = escapeAttr((opts && opts.domain) || "your-site.netlify.app");
         const snippet = `<script defer data-domain="${domain}" src="https://plausible.io/js/script.js"></script>`;
         if (!html.includes("plausible.io")) {
-          files["index.html"] = html.replace(/<\/head>/, snippet + "\n</head>");
+          files["index.html"] = html.replace(/<\/head>/i, marked("analytics", snippet) + "\n</head>");
         }
         return files;
       }
@@ -211,10 +208,34 @@
       inject: (files) => {
         const html = files["index.html"] || "";
         if (html && !html.includes("manifest.webmanifest")) {
-          files["index.html"] = html.replace(/<head>/, '<head>\n<link rel="manifest" href="/manifest.webmanifest">');
+          files["index.html"] = html.replace(/<head\b[^>]*>/i, (head) => head + "\n" + marked("pwa", '<link rel="manifest" href="/manifest.webmanifest">'));
         }
         return files;
       }
+    },
+    {
+      id: "faq",
+      name: "FAQ",
+      tagline: "Useful answers, accessible disclosure UI and honest FAQ schema",
+      icon: ICONS.faq,
+      default: true,
+      prompt: () => `FAQ plugin is ON. When the page benefits from frequently asked questions, write concise answers to real visitor objections and use accessible native <details>/<summary> disclosure elements. Add FAQPage JSON-LD only when those same questions and answers are visibly present on the page; never invent claims or hide schema-only content.`,
+      reviewItems: [
+        "FAQ answers address real visitor questions without filler",
+        "FAQPage schema, when present, exactly matches visible FAQ content"
+      ]
+    },
+    {
+      id: "performance",
+      name: "Performance",
+      tagline: "Fast-by-default assets, loading and interaction guidance",
+      icon: ICONS.performance,
+      default: false,
+      prompt: () => `PERFORMANCE plugin is ON. Keep the static site fast: no unnecessary libraries, defer non-critical scripts, give images explicit dimensions, lazy-load below-the-fold images, preload only genuinely critical assets, and avoid layout shifts. Preserve visual quality while keeping the first render lightweight.`,
+      reviewItems: [
+        "Below-the-fold images are lazy-loaded and have dimensions",
+        "Scripts and third-party assets do not block the first render unnecessarily"
+      ]
     }
   ];
 
@@ -235,9 +256,11 @@
 
   /** Apply inject hooks for enabled plugins. Returns a NEW files object. */
   function applyInjections(files, enabledIds, optionsByPlugin) {
-    let out = Object.assign({}, files);
+    const active = Array.isArray(enabledIds) ? enabledIds : [];
+    let out = {};
+    for (const path of Object.keys(files || {})) out[path] = stripPluginMarkers(files[path]);
     for (const p of PLUGINS) {
-      if (!enabledIds.includes(p.id) || !p.inject) continue;
+      if (!active.includes(p.id) || !p.inject) continue;
       const opts = (optionsByPlugin && optionsByPlugin[p.id]) || {};
       try { out = p.inject(out, opts) || out; } catch (e) { console.warn("plugin inject failed:", p.id, e); }
     }
@@ -245,5 +268,5 @@
   }
 
   window.Vecode = window.Vecode || {};
-  window.Vecode.Plugins = { PLUGINS, TYPOGRAPHY_PRESETS, getPlugin, collect, applyInjections };
+  window.Vecode.Plugins = { PLUGINS, TYPOGRAPHY_PRESETS, getPlugin, collect, applyInjections, stripPluginMarkers };
 })();

@@ -76,7 +76,35 @@
   ];
 
   /* ---------------- system prompt ---------------- */
-  function buildSystemPrompt() {
+  function fileProtocolInstructions(useTools) {
+    if (useTools !== false) {
+      return `4. Use the write_file tool to save files, read_file/list_files to inspect, and delete_file to remove. After the final write, call finish() with a short message to the user.
+5. If tools unexpectedly fail, output complete files as fenced blocks tagged with their relative paths, for example:
+   \`\`\`veccode:index.html
+   <!DOCTYPE html>…
+   \`\`\`
+   Use a four-backtick fence (\`\`\`\`veccode:index.html) if a file contains three backticks.`;
+    }
+    return `4. TOOLS ARE DISABLED FOR THIS PROVIDER. You MUST write ALL complete text files as fenced blocks tagged with each relative path. Do not merely describe edits and do not omit unchanged text files:
+   \`\`\`veccode:index.html
+   <!DOCTYPE html>…
+   \`\`\`
+   Use a four-backtick fence (\`\`\`\`veccode:index.html) if a file contains three backticks. Put conversational prose outside the blocks. Vecode will parse every block into its virtual file system.`;
+  }
+
+  function projectSnapshot() {
+    const S = window.Vecode.State;
+    return S.listFiles().map((path) => {
+      const content = S.readFile(path);
+      if (typeof content !== "string") return `--- FILE: ${path} ---\n[unreadable]`;
+      if (/^data:[^,]*;base64,/i.test(content)) return `--- FILE: ${path} ---\n[binary asset already present; preserve this file]`;
+      const shown = content.length > 18000 ? content.slice(0, 18000) + `\n… (truncated, ${content.length} characters total)` : content;
+      return `--- FILE: ${path} ---\n${shown}\n--- END FILE ---`;
+    }).join("\n\n");
+  }
+
+  function buildSystemPrompt(useTools) {
+    useTools = useTools !== false;
     const S = window.Vecode.State;
     const files = S.listFiles().map((p) => `  · ${p} (${S.fileSize(p)} bytes)`).join("\n");
     const indexHtml = S.readFile("index.html") || "";
@@ -100,21 +128,16 @@ PROJECT — "${S.state.name}"
 Files currently in the project:
 ${files}
 
-Current index.html (truncated to first 6000 chars — use read_file for the rest):
+Current index.html (truncated to first 6000 chars${useTools ? " — use read_file for the rest" : ""}):
 \`\`\`html
 ${indexSnippet}
-\`\`\`
+\`\`\`${useTools ? "" : "\n\nFULL CURRENT PROJECT (use this snapshot because this provider has no file tools):\n" + projectSnapshot()}
 
 HOW TO WORK
 1. Build complete sites: index.html + styles.css (+ script.js when behavior is needed, + pages/*.html for multi-page). Everything must actually work — no placeholder copy, no lorem ipsum, no dead links, no features the code does not implement.
 2. Vanilla HTML/CSS/JS and Google Fonts only. No CDN frameworks (Bootstrap, Tailwind, jQuery) unless the user explicitly asks.
 3. Responsive from 360px up. Semantic, accessible HTML. Dark mode when it fits the design.
-4. Use the write_file tool to save files, read_file/list_files to inspect, delete_file to remove. After the final write, call finish() with a short message to the user.
-5. If tools are somehow unavailable, you may instead output files as fenced code blocks tagged with the file path, e.g.:
-   \`\`\`veccode:index.html
-   <!DOCTYPE html>…
-   \`\`\`
-   Use a four-backtick fence ( \`\`\`\`veccode:index.html ) if the file contains three backticks.
+${fileProtocolInstructions(useTools)}
 6. Reply conversationally between tool calls. Keep the user informed in plain, warm language — no hype, no exclamation marks.
 
 DESIGN SKILL — follow it for every build:
@@ -123,7 +146,8 @@ ${window.Vecode.Skill.SKILL_MD}${pluginCtx.prompt}${skillsCtx}
 FINAL CHECK — before calling finish(), self-review the build against the anti-slop table above${pluginCtx.review.length ? " plus these plugin checks:\n" + pluginCtx.review.map((r) => " · " + r).join("\n") : ""}. Fix anything that fails.`;
   }
 
-  function buildReviewSystemPrompt() {
+  function buildReviewSystemPrompt(useTools) {
+    useTools = useTools !== false;
     const S = window.Vecode.State;
     const enabledIds = window.Vecode.Plugins.PLUGINS.filter((p) => S.isPluginEnabled(p.id)).map((p) => p.id);
     const pluginOptions = {};
@@ -132,16 +156,20 @@ FINAL CHECK — before calling finish(), self-review the build against the anti-
     const skills = S.getSkills();
     const skillsCtx = skills.length ? "\nUser-added skills also apply:\n" + skills.map((s) => `### ${s.name}\n${s.body}`).join("\n\n") : "";
 
-    return `You are Vecode's design reviewer. You audit the site the builder agent just produced and fix what does not pass the bar. You work with the same tools: read_file, write_file, list_files, delete_file, finish.
+    const protocol = useTools
+      ? "Use read_file, write_file, list_files, delete_file and finish."
+      : `This provider has no file tools. You MUST write ALL complete text files as \`\`\`veccode:path fenced blocks when applying fixes; do not output partial patches or omit unchanged text files. Use four backticks when file content contains three backticks.`;
+
+    return `You are Vecode's design reviewer. You audit the site the builder agent just produced and fix what does not pass the bar. ${protocol}${useTools ? "" : "\n\nFULL CURRENT PROJECT:\n" + projectSnapshot()}
 
 Be ruthless but surgical. Run this checklist:
 ${window.Vecode.Skill.SKILL_MD}${pluginCtx.review.length ? "\nPlugin-specific checks:\n" + pluginCtx.review.map((r) => " · " + r).join("\n") : ""}${skillsCtx}
 
 Rules:
-· Only rewrite files that actually need changes. Do not rewrite everything "just to be safe".
+· ${useTools ? "Only rewrite files that actually need changes. Do not rewrite everything \"just to be safe\"." : "When fixes are needed, return every complete text file in the required block protocol so the project remains coherent."}
 · Verify code matches comments; delete comments claiming features that do not exist.
-· If the site is already good, call finish() with a one-line verdict and change nothing.
-· After applying fixes, call finish() with a short summary of what you changed and why.`;
+· If the site is already good, ${useTools ? "call finish()" : "reply with"} a one-line verdict and change nothing.
+· After applying fixes, ${useTools ? "call finish() with" : "add"} a short summary of what you changed and why.`;
   }
 
   /* ---------------- file block parsing (fallback protocol) ---------------- */
@@ -252,7 +280,7 @@ Rules:
       const signal = this._freshAbort();
 
       try {
-        const system = mode === "review" ? buildReviewSystemPrompt() : buildSystemPrompt();
+        const system = mode === "review" ? buildReviewSystemPrompt(useTools) : buildSystemPrompt(useTools);
         let messages;
         if (mode === "review") {
           messages = [{ role: "user", content: "Audit the current project and apply fixes now. Files: " + S.listFiles().map((p) => p + " (" + S.fileSize(p) + " bytes)").join(", ") }];
@@ -386,5 +414,6 @@ Rules:
   window.Vecode = window.Vecode || {};
   window.Vecode.Agent = harness;
   window.Vecode.Agent.buildSystemPrompt = buildSystemPrompt;
+  window.Vecode.Agent.buildReviewSystemPrompt = buildReviewSystemPrompt;
   window.Vecode.Agent.parseFileBlocks = parseFileBlocks;
 })();
