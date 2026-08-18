@@ -125,7 +125,17 @@
 
   function fileSize(path) {
     const c = state.files[path];
-    return c ? new Blob([c]).size : 0;
+    if (!c) return 0;
+    // Binary imports are persisted as base64 data URIs. Report the decoded
+    // byte size rather than the larger storage representation.
+    if (typeof c === "string") {
+      const m = c.match(/^data:[^,]*;base64,([\s\S]*)$/i);
+      if (m) {
+        const b64 = m[1].replace(/\s/g, "");
+        return Math.max(0, Math.floor(b64.length * 3 / 4) - (b64.endsWith("==") ? 2 : b64.endsWith("=") ? 1 : 0));
+      }
+    }
+    return new Blob([c]).size;
   }
 
   function totalSize() {
@@ -159,6 +169,12 @@
   function updateLastMessage(patch) {
     const last = state.messages[state.messages.length - 1];
     if (last) Object.assign(last, patch);
+    saveSoon();
+    emit("messages");
+  }
+
+  function clearMessages() {
+    state.messages = [];
     saveSoon();
     emit("messages");
   }
@@ -222,7 +238,7 @@
     state, settings, load, save, saveSettings, saveSoon,
     listFiles, readFile, writeFile, deleteFile, fileSize, totalSize,
     renameProject, resetProject,
-    addMessage, updateLastMessage,
+    addMessage, updateLastMessage, clearMessages,
     getPlugin, isPluginEnabled, setPlugin,
     setProvider, getProvider, setActiveProvider, setSetting,
     getSkills, addSkill, removeSkill,

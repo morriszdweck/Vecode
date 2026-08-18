@@ -153,7 +153,12 @@ code, .mono { font-family: var(--font-mono); font-size: 0.92em; font-variant-num
 }
 .brand-sub { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-disabled); }
 .topbar-center { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); }
-.project-name { font-size: var(--text-sm); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.project-name {
+  padding: 4px 6px; border: 0; border-radius: var(--radius-sm); background: transparent;
+  font-size: var(--text-sm); color: var(--text-secondary); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 260px; text-align: left;
+}
+.project-name:hover { color: var(--text-primary); background: var(--surface-sunken); }
 .topbar-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; }
 
 /* ---------- Buttons ---------- */
@@ -341,7 +346,9 @@ code, .mono { font-family: var(--font-mono); font-size: 0.92em; font-variant-num
   flex: 1; border: none; background: none; resize: none; outline: none;
   font-size: var(--text-sm); line-height: 1.5; padding: 6px 8px; max-height: 160px;
 }
-#composerHint { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-disabled); }
+#composerHint { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-disabled); }
+.text-btn { padding: 2px 5px; border: 0; border-radius: 4px; color: var(--text-secondary); font-size: inherit; white-space: nowrap; }
+.text-btn:hover { color: var(--signal-text); background: var(--signal-wash); }
 .kbd { font-family: var(--font-mono); border: 1px solid var(--border-default); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 10.5px; }
 
 /* status bar under chat */
@@ -378,9 +385,12 @@ code, .mono { font-family: var(--font-mono); font-size: 0.92em; font-variant-num
 }
 .file-row:hover { background: var(--surface-sunken); }
 .file-row .fname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); }
+.file-row button.fname { border: 0; padding: 3px 4px; border-radius: 4px; text-align: left; font: inherit; }
+.file-row button.fname:hover { color: var(--signal-text); background: var(--signal-wash); }
 .file-row .fsize { color: var(--text-disabled); }
 .file-row .fdel { opacity: 0; }
-.file-row:hover .fdel { opacity: 1; }
+.file-row:hover .fdel, .file-row:focus-within .fdel { opacity: 1; }
+.file-editor { width: 100%; min-height: min(58vh, 520px); resize: vertical; tab-size: 2; white-space: pre; }
 .dropzone {
   border: 1.5px dashed var(--border-strong); border-radius: var(--radius);
   padding: var(--space-5); text-align: center; color: var(--text-secondary);

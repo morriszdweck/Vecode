@@ -24,7 +24,7 @@
       <span class="brand-sub">website builder</span>
     </div>
     <div class="topbar-center">
-      <span class="project-name" id="projectName">Untitled project</span>
+      <button class="project-name" id="projectName" type="button" title="Rename project">Untitled project</button>
     </div>
     <div class="topbar-actions">
       <button class="icon-btn" id="themeToggle" title="Switch theme (dark / light / system)" aria-label="Switch theme">
@@ -73,7 +73,8 @@
           </div>
           <div id="composerHint">
             <span>files autosave · preview updates live</span>
-            <span><span class="kbd">⌘</span> or <span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to build</span>
+            <button class="text-btn" id="clearChatBtn" type="button">Clear chat</button>
+            <span><span class="kbd">Enter</span> to build · <span class="kbd">Shift</span> + <span class="kbd">Enter</span> for a new line</span>
           </div>
         </div>
       </div>
@@ -97,7 +98,7 @@
         <button class="err-badge" id="errBadge" title="Preview console errors"></button>
       </div>
       <div id="previewStage">
-        <iframe id="previewFrame" title="Live preview of your site" data-device="desktop"></iframe>
+        <iframe id="previewFrame" title="Live preview of your site" data-device="desktop" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock"></iframe>
       </div>
     </section>
   </div>

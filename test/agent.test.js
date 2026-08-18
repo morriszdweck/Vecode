@@ -115,18 +115,47 @@ function anthropicSse() {
 
 /* ---------------- tests ---------------- */
 function testZip() {
-  const blob = Zip.makeZip({ "index.html": HTML, "dir/styles.css": CSS, "netlify.toml": "[build]\n" });
+  const png = "data:image/png;base64,iVBORw0KGgo=";
+  const blob = Zip.makeZip({ "index.html": HTML, "dir/styles.css": CSS, "assets/logo.png": png, "netlify.toml": "[build]\n" });
   assert.ok(blob.size > 100, "zip has content");
   return blob.arrayBuffer().then((ab) => {
     const bytes = new Uint8Array(ab);
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     const text = Buffer.from(bytes).toString("latin1");
     assert.ok(text.includes("index.html"), "central dir lists index.html");
     assert.ok(text.includes("dir/styles.css"), "central dir lists nested file");
-    // verify stored content is intact (STORE method → content appears raw)
-    assert.ok(text.includes("<h1>hi</h1>"), "stored content present");
-    // EOCD signature at end
-    assert.strictEqual(bytes[bytes.length - 22], 0x50, "EOCD signature starts at -22");
-    console.log("  ✓ zip writer: entries + EOCD valid");
+    assert.ok(text.includes("assets/logo.png"), "central dir lists binary file");
+    assert.ok(text.includes("<h1>hi</h1>"), "stored text content is intact");
+
+    // Read STORE entries from their local headers and verify data-URI decoding.
+    const local = {};
+    let offset = 0;
+    while (offset + 30 <= bytes.length && view.getUint32(offset, true) === 0x04034b50) {
+      const size = view.getUint32(offset + 18, true);
+      const nameLen = view.getUint16(offset + 26, true);
+      const extraLen = view.getUint16(offset + 28, true);
+      const name = Buffer.from(bytes.slice(offset + 30, offset + 30 + nameLen)).toString("utf8");
+      const start = offset + 30 + nameLen + extraLen;
+      local[name] = bytes.slice(start, start + size);
+      offset = start + size;
+    }
+    assert.deepStrictEqual(Array.from(local["assets/logo.png"]), [137, 80, 78, 71, 13, 10, 26, 10], "data URI decoded to raw PNG bytes");
+
+    // Every central-directory offset must point at its own local header.
+    const eocd = bytes.length - 22;
+    assert.strictEqual(view.getUint32(eocd, true), 0x06054b50, "EOCD signature present");
+    const count = view.getUint16(eocd + 10, true);
+    let central = view.getUint32(eocd + 16, true);
+    for (let i = 0; i < count; i++) {
+      assert.strictEqual(view.getUint32(central, true), 0x02014b50, "central record signature");
+      const nameLen = view.getUint16(central + 28, true);
+      const extraLen = view.getUint16(central + 30, true);
+      const commentLen = view.getUint16(central + 32, true);
+      const localOffset = view.getUint32(central + 42, true);
+      assert.strictEqual(view.getUint32(localOffset, true), 0x04034b50, "central offset points to a local header");
+      central += 46 + nameLen + extraLen + commentLen;
+    }
+    console.log("  ✓ zip writer: valid offsets + data-URI binary bytes");
   });
 }
 
@@ -158,7 +187,7 @@ async function testAgentLoop() {
   // files written by tools
   const writtenHtml = State.readFile("index.html");
   assert.ok(writtenHtml.includes("<h1>hi</h1>"), "index.html written by tool");
-  assert.ok(writtenHtml.includes('name="description"'), "SEO plugin injected meta tags after build");
+  assert.ok(!writtenHtml.includes("Describe what this site offers") && !writtenHtml.includes("your-site.netlify.app/og"), "SEO plugin never injects placeholder metadata");
   assert.strictEqual(State.readFile("styles.css"), CSS, "styles.css written by tool");
   assert.ok(State.listFiles().includes("index.html"));
 
@@ -293,13 +322,41 @@ async function testSystemPrompt() {
   State.setPlugin("seo", true);
   State.setPlugin("a11y", true);
   State.addSkill("Tone", "Write like a librarian.");
-  const sp = Agent.buildSystemPrompt();
+  const sp = Agent.buildSystemPrompt(true);
   assert.ok(sp.includes("Vecode Design Skill"), "design skill embedded");
   assert.ok(sp.includes("anti-slop"), "anti-slop checklist embedded");
   assert.ok(sp.includes("SEO plugin is ON"), "plugin prompt injected");
   assert.ok(sp.includes("Write like a librarian."), "custom skill injected");
   assert.ok(sp.includes("veccode:index.html"), "file protocol documented");
-  console.log("  ✓ system prompt: skill + plugins + custom skills + protocol");
+  const noTools = Agent.buildSystemPrompt(false);
+  assert.ok(noTools.includes("TOOLS ARE DISABLED") && noTools.includes("MUST write ALL complete text files"), "no-tools build protocol is mandatory");
+  const noToolsReview = Agent.buildReviewSystemPrompt(false);
+  assert.ok(noToolsReview.includes("MUST write ALL complete text files") && noToolsReview.includes("FULL CURRENT PROJECT"), "no-tools review protocol is mandatory");
+  console.log("  ✓ system prompts: tools + mandatory block-protocol fallback");
+}
+
+function testPluginInjections() {
+  assert.strictEqual(Plugins.PLUGINS.length, 10, "10 plugins registered");
+  const defaults = Plugins.PLUGINS.filter((p) => p.default).map((p) => p.id);
+  for (const id of ["typography", "darkmode", "motion", "forms", "seo", "a11y", "faq"]) {
+    assert.ok(defaults.includes(id), id + " defaults on");
+  }
+
+  const base = { "index.html": "<!doctype html><html><head><title>Real site</title></head><body><h1>Real site</h1></body></html>" };
+  const enabled = Plugins.applyInjections(base, ["analytics"], { analytics: { domain: "real.example" } });
+  assert.ok(enabled["index.html"].includes("<!-- vecode:plugin:analytics -->"), "analytics start marker");
+  assert.ok(enabled["index.html"].includes("<!-- /vecode:plugin:analytics -->"), "analytics end marker");
+  assert.ok(enabled["index.html"].includes('data-domain="real.example"'), "analytics option injected");
+
+  const repeated = Plugins.applyInjections(enabled, ["analytics"], { analytics: { domain: "real.example" } });
+  assert.strictEqual((repeated["index.html"].match(/plausible\.io/g) || []).length, 1, "reapplying never duplicates");
+  const disabled = Plugins.applyInjections(repeated, [], {});
+  assert.ok(!disabled["index.html"].includes("plausible.io") && !disabled["index.html"].includes("vecode:plugin:analytics"), "toggle off removes managed code");
+
+  const seo = Plugins.applyInjections(base, ["seo"], {});
+  assert.strictEqual(seo["index.html"], base["index.html"], "SEO is prompt/review only and injects no fake metadata");
+  assert.ok(!seo["index.html"].includes("Describe what this site offers") && !seo["index.html"].includes("your-site.netlify.app/og"), "no placeholder SEO values");
+  console.log("  ✓ plugin injects: 10 defaults, marked, reversible, idempotent, no fake SEO");
 }
 
 (async () => {
@@ -307,7 +364,8 @@ async function testSystemPrompt() {
   await testZip();
   testParseBlocks();
   await testCodexOAuthHelpers();
-  testSystemPrompt();
+  await testSystemPrompt();
+  testPluginInjections();
   await testAnthropicAdapter();
   await testBlockFallbackLoop();
   await testAgentLoop();

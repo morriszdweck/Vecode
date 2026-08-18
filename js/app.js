@@ -147,7 +147,63 @@
   }
 
   /* ================= preview ================= */
-  const PREVIEW_BRIDGE = "<script>(function(){function go(a){var h=(a.getAttribute('href')||'').split('#')[0];if(!h||/^(https?:|mailto:|tel:|javascript:)/.test(h))return;if(h.endsWith('.html')){a.preventDefault();parent.postMessage({vecode:'nav',href:h},'*');}}document.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a'):null;if(a)go(a);},true);window.addEventListener('error',function(ev){parent.postMessage({vecode:'error',msg:String(ev.message||'')},'*');});window.addEventListener('unhandledrejection',function(ev){parent.postMessage({vecode:'error',msg:String(ev.reason||'unhandled rejection')},'*');});})();</"+"script>";
+  function tagAttr(tag, name) {
+    const source = String(tag);
+    const quoted = source.match(new RegExp("\\b" + name + "\\s*=\\s*([\\\"'])([\\s\\S]*?)\\1", "i"));
+    if (quoted) return quoted[2];
+    const bare = source.match(new RegExp("\\b" + name + "\\s*=\\s*([^\\s\\\"'=<>`]+)", "i"));
+    return bare ? bare[1] : null;
+  }
+
+  function cleanAssetRef(ref) {
+    const raw = String(ref || "").trim().split(/[?#]/)[0].replace(/\\/g, "/");
+    try { return decodeURIComponent(raw); } catch (e) { return raw; }
+  }
+
+  function normalizeAssetPath(ref, page) {
+    let clean = cleanAssetRef(ref);
+    if (!clean || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(clean)) return null;
+    if (clean.startsWith("/")) clean = clean.slice(1);
+    const base = cleanAssetRef(page || "index.html").split("/").slice(0, -1);
+    const parts = (String(ref).trim().startsWith("/") ? [] : base).concat(clean.split("/"));
+    const normalized = [];
+    for (const part of parts) {
+      if (!part || part === ".") continue;
+      if (part === "..") normalized.pop();
+      else normalized.push(part);
+    }
+    return normalized.join("/");
+  }
+
+  function escapeRawClose(content, tag) {
+    return String(content).replace(new RegExp("<\\/" + tag, "gi"), "<\\/" + tag);
+  }
+
+  function mimeForPath(path) {
+    const ext = (cleanAssetRef(path).split(".").pop() || "").toLowerCase();
+    return ext === "svg" ? "image/svg+xml"
+      : ext === "jpg" || ext === "jpeg" ? "image/jpeg"
+      : ext === "png" ? "image/png"
+      : ext === "gif" ? "image/gif"
+      : ext === "webp" ? "image/webp"
+      : ext === "avif" ? "image/avif"
+      : ext === "ico" ? "image/x-icon"
+      : "application/octet-stream";
+  }
+
+  function textDataUri(content, path) {
+    if (/^data:[^,]*,/i.test(content)) return content;
+    try { return "data:" + mimeForPath(path) + ";base64," + btoa(unescape(encodeURIComponent(content))); }
+    catch (e) { return null; }
+  }
+
+  const PREVIEW_BRIDGE =  "<script>(function(){" +
+    "function blocked(m,e){var n=e&&e.name||'';return n==='SecurityError'||/SecurityError|sandboxed.+allow-same-origin|access is denied|operation is insecure|denied access to property|blocked a frame with origin ['\\\"]?null/i.test(String(m||''));}" +
+    "function report(m,e){if(!blocked(m,e))parent.postMessage({vecode:'error',msg:String(m||'Unknown preview error')},'*');}" +
+    "document.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a'):null;if(!a)return;var h=(a.getAttribute('href')||'').split('#')[0];if(!h||/^(https?:|mailto:|tel:|javascript:|\/\/)/i.test(h))return;if(/\\.html(?:[?#].*)?$/i.test(h)){e.preventDefault();parent.postMessage({vecode:'nav',href:h},'*');}},true);" +
+    "window.addEventListener('error',function(ev){report(ev.message||'',ev.error);});" +
+    "window.addEventListener('unhandledrejection',function(ev){var r=ev.reason;report(r&&r.message||r||'unhandled rejection',r);});" +
+    "})();</" + "script>";
 
   const preview = {
     page: "index.html",
@@ -180,28 +236,43 @@
       $("#previewUrl").textContent = "preview://" + this.page;
     },
     inlineAssets(html) {
-      const S = () => window.Vecode.State;
-      // local stylesheets
-      html = html.replace(/<link\b[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi, (m, href) => {
-        const css = S().readFile(href);
-        return css !== null ? "<style>\n" + css + "\n</style>" : m;
+      const store = window.Vecode.State;
+      const readAsset = (ref) => {
+        const path = normalizeAssetPath(ref, this.page);
+        if (!path) return null;
+        const content = store.readFile(path);
+        return content === null ? null : { path, content };
+      };
+
+      // Match the whole tag first, then inspect attributes. This works whether
+      // href/src comes before or after rel, async, type, crossorigin, etc.
+      html = html.replace(/<link\b[^>]*>/gi, (tag) => {
+        const rel = tagAttr(tag, "rel");
+        const href = tagAttr(tag, "href");
+        if (!href || !rel || !rel.toLowerCase().split(/\s+/).includes("stylesheet")) return tag;
+        const asset = readAsset(href);
+        if (!asset || /^data:/i.test(asset.content)) return tag;
+        return "<style>\n" + escapeRawClose(asset.content, "style") + "\n</style>";
       });
-      // local scripts
-      html = html.replace(/<script\b[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi, (m, src) => {
-        const js = S().readFile(src);
-        return js !== null ? "<script>\n" + js + "\n</scr" + "ipt>" : m;
+
+      html = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, (tag) => {
+        const src = tagAttr(tag.slice(0, tag.indexOf(">") + 1), "src");
+        if (!src) return tag;
+        const asset = readAsset(src);
+        if (!asset || /^data:/i.test(asset.content)) return tag;
+        return "<script>\n" + escapeRawClose(asset.content, "script") + "\n</scr" + "ipt>";
       });
-      // local images (text formats only)
-      html = html.replace(/(<img\b[^>]*src=["'])([^"']+)(["'][^>]*>)/gi, (m, pre, src, post) => {
-        if (/^(https?:|data:|blob:|#|\/\/)/.test(src)) return m;
-        const bin = S().readFile(src);
-        if (bin === null) return m;
-        try {
-          const ext = (src.split(".").pop() || "").toLowerCase();
-          const mime = ext === "svg" ? "image/svg+xml" : ext === "jpg" || ext === "jpeg" ? "image/jpeg" : ext === "png" ? "image/png" : ext === "gif" ? "image/gif" : ext === "webp" ? "image/webp" : "application/octet-stream";
-          const b64 = btoa(unescape(encodeURIComponent(bin)));
-          return pre + "data:" + mime + ";base64," + b64 + post;
-        } catch (e) { return m; }
+
+      html = html.replace(/<(?:img|source)\b[^>]*>/gi, (tag) => {
+        const src = tagAttr(tag, "src");
+        if (!src || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(src)) return tag;
+        const asset = readAsset(src);
+        if (!asset) return tag;
+        const uri = textDataUri(asset.content, asset.path);
+        if (!uri) return tag;
+        const quoted = /(\bsrc\s*=\s*)(["'])([\s\S]*?)\2/i;
+        if (quoted.test(tag)) return tag.replace(quoted, (m, before, quote) => before + quote + uri + quote);
+        return tag.replace(/(\bsrc\s*=\s*)[^\s>]+/i, "$1\"" + uri + "\"");
       });
       return html;
     },
@@ -225,12 +296,16 @@
   window.addEventListener("message", (e) => {
     const d = e.data;
     if (!d || d.vecode !== "nav" && d.vecode !== "error") return;
+    const frame = $("#previewFrame");
+    if (e.source && frame && frame.contentWindow && e.source !== frame.contentWindow) return;
     if (d.vecode === "nav") {
-      const target = d.href.split("?")[0];
-      if (S().readFile(target) !== null) { preview.page = target; preview.render(); }
-      else toast("No page named " + target + " in the project yet", "err");
+      const target = normalizeAssetPath(d.href, preview.page);
+      if (target && S().readFile(target) !== null) { preview.page = target; preview.render(); }
+      else toast("No page named " + (target || d.href) + " in the project yet", "err");
     } else if (d.vecode === "error") {
-      preview.errors.push(d.msg);
+      const msg = String(d.msg || "Unknown preview error");
+      if (/SecurityError|sandboxed.+allow-same-origin|access is denied|operation is insecure|denied access to property/i.test(msg)) return;
+      preview.errors.push(msg);
       if (preview.errors.length <= 20) preview.updateErrors();
     }
   });
@@ -277,6 +352,7 @@
       body.innerHTML = mdLight(m.content || "");
       wrap.appendChild(body);
       if (streaming) {
+        body.setAttribute("data-raw", m.content || "");
         body.appendChild(el("span", { class: "cursor-blink" }));
         this.streamingEl = body;
       }
@@ -298,8 +374,9 @@
       if (!this.streamingEl) return;
       const cursor = this.streamingEl.querySelector(".cursor-blink");
       if (cursor) cursor.remove();
-      this.streamingEl.innerHTML = mdLight(this.streamingEl.getAttribute("data-raw") + text);
-      this.streamingEl.setAttribute("data-raw", (this.streamingEl.getAttribute("data-raw") || "") + text);
+      const raw = (this.streamingEl.getAttribute("data-raw") || "") + text;
+      this.streamingEl.setAttribute("data-raw", raw);
+      this.streamingEl.innerHTML = mdLight(raw);
       this.streamingEl.appendChild(el("span", { class: "cursor-blink" }));
       const log = $("#chatLog");
       log.scrollTop = log.scrollHeight;
@@ -438,7 +515,7 @@
     const seg = $("#deviceSeg");
     seg.innerHTML = "";
     for (const d of [["desktop", "Desktop"], ["tablet", "Tablet"], ["mobile", "Mobile"]]) {
-      seg.appendChild(el("button", { class: d[0] === preview.device ? "active" : "", text: d[1], onclick: () => { preview.device = d[0]; $("#previewFrame").dataset.device = d[0]; $$("#deviceSeg button").forEach((b) => b.classList.remove("active")); seg.lastChild.classList.add("active"); } }));
+      seg.appendChild(el("button", { class: d[0] === preview.device ? "active" : "", text: d[1], onclick: (e) => { preview.device = d[0]; $("#previewFrame").dataset.device = d[0]; $$("#deviceSeg button").forEach((b) => b.classList.remove("active")); e.currentTarget.classList.add("active"); } }));
     }
   }
 
@@ -525,7 +602,7 @@
     for (const p of S().listFiles()) {
       const bytes = S().fileSize(p);
       const row = el("div", { class: "file-row" }, [
-        el("span", { class: "fname", text: p }),
+        el("button", { class: "fname", type: "button", title: "Edit " + p, text: p, onclick: () => openFileEditor(p, list) }),
         el("span", { class: "fsize", text: bytes > 1024 ? (bytes / 1024).toFixed(1) + " KB" : bytes + " B" }),
         el("button", { class: "icon-btn fdel", title: "Delete", html: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.8 9.5h6.4L12 4"/></svg>', onclick: () => {
           if (S().state.files["index.html"] && p === "index.html" && Object.keys(S().state.files).length === 1) { toast("Keep at least one file — try adding a page first", "err"); return; }
@@ -538,14 +615,73 @@
     if (!list.children.length) list.appendChild(el("p", { class: "small muted", text: "No files yet." }));
   }
 
-  async function importDroppedFiles(fileList) {
-    const S = () => window.Vecode.State;
-    for (const f of Array.from(fileList)) {
-      const text = await f.text().catch(() => null);
-      if (text === null) { toast("Could not read " + f.name, "err"); continue; }
-      S().writeFile(f.name, text);
+  function openFileEditor(path, list) {
+    const content = S().readFile(path);
+    if (content === null) { toast("That file no longer exists", "err"); return; }
+    if (/^data:[^,]*;base64,/i.test(content)) {
+      toast("Binary assets can be previewed and exported, but not edited as text.", "err");
+      return;
     }
-    toast("Imported " + fileList.length + " file(s)", "ok");
+    const editor = el("textarea", {
+      class: "text-input file-editor",
+      id: "fileEditor",
+      spellcheck: "false",
+      "aria-label": "Contents of " + path
+    });
+    editor.value = content;
+    const saveButton = el("button", { class: "btn btn-signal", text: "Save file", onclick: () => {
+      S().writeFile(path, editor.value);
+      if (list && document.body.contains(list)) renderTree(list);
+      closeModal();
+      preview.refreshSoon();
+      toast("Saved " + path, "ok");
+    } });
+    openModal("Edit " + path, editor, [
+      el("button", { class: "btn", text: "Cancel", onclick: closeModal }),
+      saveButton
+    ], true);
+    setTimeout(() => editor.focus(), 0);
+  }
+
+  function readFileAsDataUri(file) {
+    return new Promise((resolve, reject) => {
+      if (typeof FileReader !== "undefined") {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error || new Error("Could not read file"));
+        reader.readAsDataURL(file);
+        return;
+      }
+      if (file.arrayBuffer) {
+        file.arrayBuffer().then((buffer) => {
+          const bytes = new Uint8Array(buffer);
+          let binary = "";
+          for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+          resolve("data:" + (file.type || "application/octet-stream") + ";base64," + btoa(binary));
+        }, reject);
+        return;
+      }
+      reject(new Error("Binary file reading is not supported in this browser"));
+    });
+  }
+
+  async function importDroppedFiles(fileList) {
+    const files = Array.from(fileList || []);
+    let imported = 0;
+    for (const file of files) {
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      const textLike = /^text\//i.test(file.type || "")
+        || /^(?:application\/(?:json|javascript|xml)|image\/svg\+xml)$/i.test(file.type || "")
+        || /^(?:html?|css|js|mjs|cjs|json|md|txt|csv|xml|svg|toml|ya?ml)$/i.test(ext);
+      try {
+        const content = textLike ? await file.text() : await readFileAsDataUri(file);
+        S().writeFile(file.name, content);
+        imported++;
+      } catch (e) {
+        toast("Could not read " + file.name + ": " + (e.message || e), "err");
+      }
+    }
+    toast("Imported " + imported + " file(s)", imported ? "ok" : "err");
     renderFiles();
     preview.refreshSoon();
   }
@@ -553,7 +689,7 @@
   function exportZip() {
     const S = () => window.Vecode.State;
     const files = Object.assign({}, S().state.files);
-    files["netlify.toml"] = `[build]\n  publish = "."\n`;
+    files["netlify.toml"] = NETLIFY_TOML;
     files["DEPLOY.md"] = DEPLOY_MD;
     const blob = window.Vecode.Zip.makeZip(files);
     window.Vecode.Zip.downloadBlob(blob, slug(S().state.name) + ".zip");
@@ -605,6 +741,18 @@
   function slug(name) {
     return String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "vecode-site";
   }
+
+  const NETLIFY_TOML = `# Generated by Vecode — static site, no build step
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+`;
 
   const DEPLOY_MD = `# Deploying this site to Netlify
 
@@ -660,14 +808,20 @@ Notes
         ])
       ]);
       if (cfg.enabled && p.hasOptions) {
-        const opts = el("div", { class: "plugin-opt" }, [
-          el("span", { text: p.optionLabel }),
-          el("select", { class: "text-input", style: "width:auto", onchange: (e) => { S().setPlugin(p.id, true, Object.assign({}, S().getPlugin(p.id).options, { preset: e.target.value })); } }, (p.getOptions ? p.getOptions() : []).map((o) =>
+        const opts = el("div", { class: "plugin-opt" }, [el("span", { text: p.optionLabel })]);
+        if (p.getOptions) {
+          opts.appendChild(el("select", { class: "text-input", style: "width:auto", onchange: (e) => {
+            S().setPlugin(p.id, true, Object.assign({}, S().getPlugin(p.id).options, { preset: e.target.value }));
+            applyPluginInjectionsNow();
+          } }, p.getOptions().map((o) =>
             el("option", { value: o.value, selected: (S().getPlugin(p.id).options && S().getPlugin(p.id).options.preset) === o.value ? "selected" : null, text: o.label })
-          ))
-        ]);
+          )));
+        }
         if (p.id === "analytics") {
-          opts.appendChild(el("input", { class: "text-input", style: "width:200px", placeholder: "your-site.netlify.app", value: S().getPlugin(p.id).options.domain || "", onchange: (e) => S().setPlugin(p.id, true, Object.assign({}, S().getPlugin(p.id).options, { domain: e.target.value })) }));
+          opts.appendChild(el("input", { class: "text-input", style: "width:200px", placeholder: "your-site.netlify.app", value: S().getPlugin(p.id).options.domain || "", onchange: (e) => {
+            S().setPlugin(p.id, true, Object.assign({}, S().getPlugin(p.id).options, { domain: e.target.value.trim() }));
+            applyPluginInjectionsNow();
+          } }));
         }
         card.querySelector(".plugin-body").appendChild(opts);
       }
@@ -1063,6 +1217,42 @@ Notes
   }
 
   /* ================= topbar ================= */
+  function renameProjectModal() {
+    const input = el("input", {
+      class: "text-input",
+      id: "projectNameInput",
+      value: S().state.name,
+      maxlength: "80",
+      "aria-label": "Project name"
+    });
+    const save = () => {
+      const name = input.value.trim();
+      if (!name) { toast("Give the project a name", "err"); input.focus(); return; }
+      S().renameProject(name);
+      closeModal();
+      toast("Project renamed", "ok");
+    };
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); save(); } });
+    openModal("Rename project", el("div", { class: "field" }, [
+      el("label", { for: "projectNameInput", text: "Project name" }),
+      input
+    ]), [
+      el("button", { class: "btn", text: "Cancel", onclick: closeModal }),
+      el("button", { class: "btn btn-signal", text: "Rename", onclick: save })
+    ]);
+    setTimeout(() => { input.focus(); input.select(); }, 0);
+  }
+
+  function seedPluginDefaults() {
+    let changed = false;
+    for (const plugin of window.Vecode.Plugins.PLUGINS) {
+      if (Object.prototype.hasOwnProperty.call(S().settings.plugins, plugin.id)) continue;
+      S().settings.plugins[plugin.id] = { enabled: !!plugin.default, options: {} };
+      changed = true;
+    }
+    if (changed) S().saveSettings();
+  }
+
   function renderTopbar() {
     const cfg = window.Vecode.Providers.activeConfig();
     const meta = window.Vecode.Providers.getProviderMeta(cfg.id);
@@ -1075,6 +1265,7 @@ Notes
   /* ================= init ================= */
   function init() {
     S().load();
+    seedPluginDefaults();
     wireAgent();
     applyTheme(S().settings.theme);
 
@@ -1086,6 +1277,7 @@ Notes
     });
     $("#modelPill").addEventListener("click", renderSettingsModal);
     $("#settingsBtn").addEventListener("click", renderSettingsModal);
+    $("#projectName").addEventListener("click", renameProjectModal);
     $("#deployBtn").addEventListener("click", () => switchView("deploy"));
 
     // rail
@@ -1094,14 +1286,27 @@ Notes
     // composer
     const input = $("#chatInput");
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(input.value); input.value = ""; input.style.height = "auto"; }
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        send(input.value);
+        input.value = "";
+        input.style.height = "auto";
+      }
     });
     input.addEventListener("input", () => {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 160) + "px";
     });
-    $("#sendBtn").addEventListener("click", () => { send(input.value); input.value = ""; });
+    $("#sendBtn").addEventListener("click", () => { send(input.value); input.value = ""; input.style.height = "auto"; });
     $("#stopBtn").addEventListener("click", () => window.Vecode.Agent.stop());
+    $("#clearChatBtn").addEventListener("click", () => {
+      if (!S().state.messages.length) return;
+      if (!confirm("Clear the chat history? Your project files will be kept.")) return;
+      S().clearMessages();
+      chat.render();
+      setConn("idle", "chat cleared · files kept");
+      toast("Chat cleared — project files kept", "ok");
+    });
 
     // preview toolbar
     renderPreviewToolbar();

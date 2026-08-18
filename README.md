@@ -8,8 +8,8 @@ Describe a site in one sentence. Vecode's built-in agent writes real HTML, CSS a
 - **Bring your own key** — OpenAI, Anthropic, Google Gemini, OpenRouter, xAI Grok, **Codex (ChatGPT OAuth)** and any custom OpenAI-compatible endpoint (the OpenCode-style "just paste your key" flow)
 - **Full agent harness** — streaming tool calls (`write_file`, `read_file`, `list_files`, `delete_file`, `finish`), a fenced-block file protocol as universal fallback, a design-review pass after every build, cancellation, token accounting
 - **Design skill built in** — a working implementation of the *Minc Frontend Design Skill* (scientific humanism: one signal color, 3-role typography, two grid modes, quiet generative texture, human voice). Ships in [`skill/`](skill/) so you can drop it into any agent
-- **Plugins** — typography pairings, dark mode, motion, Netlify Forms, SEO, analytics, accessibility, PWA — each one injects real code and real instructions
-- **Live preview** — desktop/tablet/mobile, multi-page navigation, console-error capture, open-in-new-tab
+- **10 plugins** — typography, dark mode, motion, Netlify Forms, SEO, analytics, accessibility, PWA, FAQ and performance; managed code injections are marked, reversible and idempotent
+- **Live preview** — desktop/tablet/mobile, multi-page navigation, binary assets, console-error capture and open-in-new-tab, isolated in a sandbox that cannot read Vecode's saved keys
 - **Deploy in two steps** — export ZIP → drop on [app.netlify.com/drop](https://app.netlify.com/drop). Full guide in-app and below
 
 ---
@@ -19,13 +19,13 @@ Describe a site in one sentence. Vecode's built-in agent writes real HTML, CSS a
 1. **Open `index.html`** directly in a browser (works from `file://` — no server needed), or
 2. Host it anywhere static — it's just files.
 
-Everything saves to your browser's localStorage: project files, messages, keys, plugin settings.
+Everything saves to your browser's localStorage: project files (including imported binary assets), messages, keys and plugin settings. Text files can be edited in-app, and the project name and chat history can be managed independently.
 
 ## Quick start
 
 1. **Pick a model** — the free Poolside tier is selected by default and needs nothing. For BYOK, open **Models & settings** (top-right) and paste a key.
 2. **Describe the site** — "A landing page for a coffee roaster called Ember & Oak", or start from a template (Build screen, or Files → Start from a template).
-3. **Watch it build** — files stream into the left pane, the preview updates live. Follow up with plain sentences: "make the hero darker", "add a pricing section".
+3. **Watch it build** — press **Enter** to send (**Shift+Enter** adds a line); files stream into the workspace and the preview updates live. Follow up with plain sentences: "make the hero darker", "add a pricing section".
 4. **Deploy** — Deploy tab → *Download ZIP* → drag it onto [Netlify Drop](https://app.netlify.com/drop). Live URL in seconds.
 
 ## Model providers
@@ -60,10 +60,14 @@ Each plugin contributes real instructions to the agent prompt and, where it make
 - **Dark mode** — token-remap dark theme guidance + `color-scheme` meta
 - **Motion** — micro-interaction rules + a reveal-on-scroll helper that respects `prefers-reduced-motion`
 - **Netlify Forms** — forms with `data-netlify="true"` + honeypot, so submissions land in your Netlify dashboard after deploy
-- **SEO** — title/description/Open Graph/JSON-LD guidance + meta injection
+- **SEO** — title/description/Open Graph/JSON-LD guidance and review checks; it deliberately does not inject fake placeholder metadata
 - **Analytics** — privacy-friendly Plausible snippet with your domain
 - **Accessibility** — semantic landmarks, labels, contrast, focus, reduced-motion rules + review checks
 - **PWA / offline** — manifest + service worker guidance
+- **FAQ** — useful answers, accessible disclosure UI and honest FAQPage schema checks
+- **Performance** — image sizing/loading, script deferral and layout-shift guidance
+
+Plugins marked `default: true` start enabled on first run. Any code a plugin injects is enclosed in `<!-- vecode:plugin:id -->` markers. Reapplying a plugin never duplicates its code, and switching it off removes only the code it manages.
 
 ## The design skill
 
@@ -106,11 +110,13 @@ Vecode is a static site — this whole repo. Drag it onto Netlify Drop or `netli
 ## Development
 
 ```bash
-npm test        # runs the agent-harness integration tests (Node, no deps)
-npm run serve   # static file server for local dev
+npm install
+npm test             # agent/provider/plugin/ZIP integration suite
+python3 -m http.server 4173 --bind 0.0.0.0
+npm run test:smoke   # in another shell: full-app jsdom smoke suite
 ```
 
-The test suite spins up mock OpenAI-compatible and Anthropic servers and drives the real browser modules: the streaming tool loop, the fenced-block fallback, the review pass, the Anthropic adapter conversion and the ZIP writer.
+The tests spin up mock OpenAI-compatible and Anthropic servers and drive the real browser modules: streaming tool and block-protocol loops, review prompts, reversible plugin injection, binary ZIP output, app boot, onboarding, settings, file editing, sandboxed preview transforms, export and chat clearing.
 
 ## Layout
 
@@ -123,8 +129,8 @@ js/agent.js           the agent harness (tools, file protocol, review pass)
 js/plugins.js         plugin registry
 js/templates.js       starter templates (hand-built with the design skill)
 js/skill.js           embedded design skill
-js/zip.js             dependency-free ZIP writer
-js/app.js             UI, preview, panels, modals
+js/zip.js             dependency-free ZIP writer (data-URI aware)
+js/app.js             UI, sandboxed preview, files/editor, panels, modals
 skill/                the standalone design skill (drop into any agent)
 netlify.toml          deploy config
 test/agent.test.js    integration tests (no dependencies)
