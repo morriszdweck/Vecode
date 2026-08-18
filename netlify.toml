@@ -1,0 +1,20 @@
+# Vecode — Netlify configuration
+# This file ships in every project export so deployed sites get sensible defaults.
+# Vecode itself is a static site: no build step, nothing to compile.
+
+[build]
+  publish = "."
+
+# Security headers + no-sniffing for generated sites.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+# SPA-style fallback: if your site grows client-side routes, uncomment this.
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200

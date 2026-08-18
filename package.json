@@ -1,0 +1,16 @@
+{
+  "name": "vecode",
+  "version": "2.0.0",
+  "description": "Vecode — a simple, clean AI website builder that runs entirely in your browser. Agent harness, live preview, plugins, BYOK + free tier, Netlify deploy.",
+  "main": "index.html",
+  "scripts": {
+    "test": "node test/agent.test.js",
+    "test:smoke": "node test/app.smoke.js",
+    "serve": "npx serve ."
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  },
+  "keywords": ["website-builder", "ai-agent", "browser", "byok", "netlify", "no-build"],
+  "license": "MIT"
+}

@@ -1,0 +1,127 @@
+/* ==========================================================================
+   Minc Frontend Design — default token preset
+   Signal-blue family + neutral ramp + pastel accents.
+   Light + dark via [data-theme="dark"] or prefers-color-scheme.
+   Import once at the app root; components consume the semantic roles only.
+   ========================================================================== */
+
+:root {
+  /* --- Signal family (default preset: blue) --- */
+  --signal-deep: #002F5B;
+  --signal: #007CFF;
+  --signal-bright: #00A1FF;
+  --signal-ice: #A0DAF7;
+  --signal-cyan: #00F6FF;
+
+  /* --- Neutral ramp --- */
+  --ink: #121212;
+  --gray-70: #707070;
+  --gray-50: #8D9390;
+  --gray-40: #C3C3C3;
+  --surface-line: #E1E3E6;
+  --paper: #FFFFFF;
+  --paper-warm: #FCFCFA;
+
+  /* --- Pastel accents --- */
+  --pastel-lilac: #DFC8F5;
+  --pastel-pink: #FFD1D4;
+  --pastel-green: #B3F4A8;
+  --pastel-yellow: #F4F9A7;
+
+  /* --- Semantic roles (light) --- */
+  --surface-base: var(--paper-warm);
+  --surface-raised: var(--paper);
+  --surface-sunken: #F4F5F6;
+  --text-primary: var(--ink);
+  --text-secondary: var(--gray-70);
+  --text-disabled: var(--gray-40);
+  --border-default: var(--surface-line);
+  --border-strong: var(--gray-40);
+  --signal-action: var(--signal);
+  --signal-action-hover: var(--signal-bright);
+  --signal-wash: color-mix(in srgb, var(--signal-ice) 35%, transparent);
+  --signal-text: var(--signal-deep);
+  --accent-1: var(--pastel-lilac);
+  --accent-2: var(--pastel-pink);
+  --accent-3: var(--pastel-green);
+  --accent-4: var(--pastel-yellow);
+
+  /* --- Spacing: base-8 scale + fluid grid margins --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+  --grid-margin: clamp(24px, 6vw, 96px);
+  --grid-gutter: 24px;
+
+  /* --- Type roles --- */
+  --font-ui: "Inter", "IBM Plex Sans", "Public Sans", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  --font-editorial: "Sentient", "Source Serif 4", "Newsreader", "Lora", Georgia, serif;
+
+  /* --- Type scale --- */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --text-2xl: 40px;
+  --text-display: clamp(56px, 8vw, 96px);
+
+  /* --- Motion --- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  color-scheme: light;
+}
+
+/* --- Dark theme: explicit attribute takes precedence --- */
+[data-theme="dark"] {
+  --surface-base: #0A1622;
+  --surface-raised: #101F30;
+  --surface-sunken: #060D16;
+  --text-primary: #F2F4F6;
+  --text-secondary: #9AA4AD;
+  --text-disabled: #55606A;
+  --border-default: #22303F;
+  --border-strong: #3A4A5C;
+  --signal-action: var(--signal-bright);
+  --signal-action-hover: var(--signal);
+  --signal-wash: rgba(0, 124, 255, 0.12);
+  --signal-text: var(--signal-ice);
+  --accent-1: #8A6FB0;
+  --accent-2: #A0666B;
+  --accent-3: #5E8F57;
+  --accent-4: #8F9357;
+  color-scheme: dark;
+}
+
+/* --- Dark theme: system preference when no explicit attribute --- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface-base: #0A1622;
+    --surface-raised: #101F30;
+    --surface-sunken: #060D16;
+    --text-primary: #F2F4F6;
+    --text-secondary: #9AA4AD;
+    --text-disabled: #55606A;
+    --border-default: #22303F;
+    --border-strong: #3A4A5C;
+    --signal-action: var(--signal-bright);
+    --signal-action-hover: var(--signal);
+    --signal-wash: rgba(0, 124, 255, 0.12);
+    --signal-text: var(--signal-ice);
+    --accent-1: #8A6FB0;
+    --accent-2: #A0666B;
+    --accent-3: #5E8F57;
+    --accent-4: #8F9357;
+    color-scheme: dark;
+  }
+}
