@@ -359,6 +359,54 @@ function testPluginInjections() {
   console.log("  ✓ plugin injects: 10 defaults, marked, reversible, idempotent, no fake SEO");
 }
 
+async function testCompletionMessageOnEmptyFinish() {
+  let turn = 0;
+  const srv = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      turn++;
+      res.writeHead(200, { "Content-Type": "text/event-stream" });
+      if (turn === 1) {
+        // pure tool call, no text
+        res.end(sse([
+          toolCallDelta(0, "call_w1", "write_file", JSON.stringify({ path: "index.html", content: HTML })),
+          toolCallDelta(1, "call_w2", "write_file", JSON.stringify({ path: "styles.css", content: CSS })),
+          finishChoice("tool_calls"),
+          { choices: [], usage: { prompt_tokens: 40, completion_tokens: 20 } }
+        ]));
+      } else {
+        // finish with empty arguments and no text
+        res.end(sse([
+          toolCallDelta(0, "call_done", "finish", JSON.stringify({})),
+          finishChoice("tool_calls"),
+          { choices: [], usage: { prompt_tokens: 30, completion_tokens: 5 } }
+        ]));
+      }
+    });
+  });
+  await new Promise((r) => srv.listen(0, r));
+  try {
+    State.resetProject(null, [], "Summary test");
+    State.setProvider("custom", { baseUrl: "http://127.0.0.1:" + srv.address().port + "/v1", key: "", model: "m" });
+    State.setActiveProvider("custom");
+    State.setSetting("review", false);
+
+    await Agent.run("Build a photographer portfolio", "build");
+    const last = State.state.messages[State.state.messages.length - 1];
+    assert.strictEqual(last.role, "assistant");
+    assert.ok(last.content && last.content.trim().length > 0, "assistant message is not blank");
+    assert.ok(last.content.includes("index.html") && last.content.includes("styles.css"), "summary lists created files: " + last.content);
+
+    // review pass with no changes produced a clean verdict
+    const reviewSummary = Agent.summarizeAgentAction("review", [], []);
+    assert.ok(reviewSummary.includes("Design review complete"), "review summary produced: " + reviewSummary);
+  } finally {
+    srv.close();
+  }
+  console.log("  ✓ completion summary: agent synthesizes clear summary when finish message is empty");
+}
+
 (async () => {
   console.log("Vecode harness tests");
   await testZip();
@@ -369,6 +417,7 @@ function testPluginInjections() {
   await testAnthropicAdapter();
   await testBlockFallbackLoop();
   await testAgentLoop();
+  await testCompletionMessageOnEmptyFinish();
   console.log("\nAll tests passed ✓");
   process.exit(0);
 })().catch((e) => {

@@ -314,7 +314,7 @@
   const chat = {
     streamingEl: null,
     streamingMode: null,
-    liveChips: null,
+    workingEl: null,
 
     render() {
       const log = $("#chatLog");
@@ -349,31 +349,50 @@
       const roleLabel = m.role === "user" ? "You" : (m.mode === "review" ? "Design review" : "Vecode");
       wrap.appendChild(el("div", { class: "msg-role", text: roleLabel }));
       const body = el("div", { class: "msg-body" });
-      body.innerHTML = mdLight(m.content || "");
-      wrap.appendChild(body);
       if (streaming) {
         body.setAttribute("data-raw", m.content || "");
-        body.appendChild(el("span", { class: "cursor-blink" }));
+        const working = el("div", { class: "agent-working" }, [
+          el("div", { class: "working-header" }, [
+            el("div", { class: "working-dots" }, [
+              el("span", { class: "working-dot" }),
+              el("span", { class: "working-dot" }),
+              el("span", { class: "working-dot" })
+            ]),
+            el("span", { class: "working-label", text: m.mode === "review" ? "Reviewing design…" : "Building your site…" })
+          ]),
+          el("div", { class: "working-bar" })
+        ]);
+        body.appendChild(working);
         this.streamingEl = body;
+        this.workingEl = working;
+      } else {
+        body.innerHTML = mdLight(m.content || "");
       }
+      wrap.appendChild(body);
       log.appendChild(wrap);
       log.scrollTop = log.scrollHeight;
       return body;
     },
 
     addStreaming(mode) {
-      if (this.streamingEl) { this.streamingEl.querySelector(".cursor-blink")?.remove(); }
+      if (this.streamingEl) {
+        const cursor = this.streamingEl.querySelector(".cursor-blink");
+        if (cursor) cursor.remove();
+      }
       this.streamingMode = mode;
       this.appendMessage({ role: "assistant", content: "", mode }, true);
-      this.liveChips = el("div", { class: "chip-row", style: "margin-top:6px" });
-      this.streamingEl.parentElement.appendChild(this.liveChips);
       this.streamingEl.parentElement.scrollIntoView({ block: "end" });
+    },
+
+    setWorkingStatus(text) {
+      if (this.workingEl) {
+        const label = this.workingEl.querySelector(".working-label");
+        if (label && text) label.textContent = text;
+      }
     },
 
     streamDelta(text) {
       if (!this.streamingEl) return;
-      const cursor = this.streamingEl.querySelector(".cursor-blink");
-      if (cursor) cursor.remove();
       const raw = (this.streamingEl.getAttribute("data-raw") || "") + text;
       this.streamingEl.setAttribute("data-raw", raw);
       this.streamingEl.innerHTML = mdLight(raw);
@@ -382,21 +401,9 @@
       log.scrollTop = log.scrollHeight;
     },
 
-    addChip(text, kind) {
-      if (!this.liveChips) return;
-      const chip = el("div", { class: "chip" }, [
-        el("span", { class: "chip-ico", text: kind === "file" ? "✎" : kind === "tool" ? "⌘" : "●" }),
-        el("span", { html: text })
-      ]);
-      this.liveChips.prepend(chip);
-      while (this.liveChips.children.length > 4) this.liveChips.lastChild.remove();
-      const log = $("#chatLog");
-      log.scrollTop = log.scrollHeight;
-    },
-
     finalize() {
       this.streamingEl = null;
-      this.liveChips = null;
+      this.workingEl = null;
       this.render();
     }
   };
@@ -473,21 +480,19 @@
   function wireAgent() {
     const A = window.Vecode.Agent;
     A.on("delta", (d) => { if (d.mode === "build" || d.mode === "review") chat.streamDelta(d.text); });
-    A.on("filesWritten", (files) => {
-      for (const f of files) {
-        const size = f.bytes !== undefined ? " · " + f.bytes + " bytes" : "";
-        chat.addChip(f.via === "plugin" ? `<b>plugin</b> applied · ${esc(f.path)}` : `<b>${esc(f.path)}</b>${size}`, "file");
+    A.on("status", (s) => {
+      if (s.label) {
+        $("#statusAction").textContent = s.label;
+        chat.setWorkingStatus(s.label);
       }
     });
-    A.on("toolStart", (tc) => {
-      if (tc.name === "write_file") chat.addChip(`writing <b>${esc((tc.args && tc.args.path) || "…")}</b>`, "tool");
-      else if (tc.name === "finish") chat.addChip("finalizing…", "tool");
+    A.on("iteration", (n) => {
+      $("#statusAction").textContent = "step " + n;
+      chat.setWorkingStatus(chat.streamingMode === "review" ? "Reviewing… (step " + n + ")" : "Building… (step " + n + ")");
     });
-    A.on("iteration", (n) => { $("#statusAction").textContent = "step " + n; });
     A.on("usage", (u) => {
       $("#statusTokens").textContent = "≈" + Math.round((u.input + u.output) / 1000) + "k tok";
     });
-    A.on("status", (s) => { if (s.label) $("#statusAction").textContent = s.label; });
     A.on("error", () => { setConn("err", "error"); });
     A.on("stopped", () => { setConn("ok", "stopped"); });
   }

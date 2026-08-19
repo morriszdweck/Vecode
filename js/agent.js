@@ -65,10 +65,15 @@
       type: "function",
       function: {
         name: "finish",
-        description: "Call when the site is complete. Provide a short message to the user describing what was built and what to try next.",
+        description: "Call when the site is complete. You must provide a message describing what was built, what files were created or modified, and suggested next steps for the user.",
         parameters: {
           type: "object",
-          properties: { message: { type: "string" } },
+          properties: {
+            message: {
+              type: "string",
+              description: "Summary message for the user explaining what was created or updated and what to try next."
+            }
+          },
           required: ["message"]
         }
       }
@@ -78,7 +83,7 @@
   /* ---------------- system prompt ---------------- */
   function fileProtocolInstructions(useTools) {
     if (useTools !== false) {
-      return `4. Use the write_file tool to save files, read_file/list_files to inspect, and delete_file to remove. After the final write, call finish() with a short message to the user.
+      return `4. Use the write_file tool to save files, read_file/list_files to inspect, and delete_file to remove. After completing all file writes, call finish() with a clear message explaining what you built, which files were created or modified, and what the user can try next.
 5. If tools unexpectedly fail, output complete files as fenced blocks tagged with their relative paths, for example:
    \`\`\`veccode:index.html
    <!DOCTYPE html>…
@@ -89,7 +94,7 @@
    \`\`\`veccode:index.html
    <!DOCTYPE html>…
    \`\`\`
-   Use a four-backtick fence (\`\`\`\`veccode:index.html) if a file contains three backticks. Put conversational prose outside the blocks. Vecode will parse every block into its virtual file system.`;
+   Use a four-backtick fence (\`\`\`\`veccode:index.html) if a file contains three backticks. Put conversational prose outside the blocks. Vecode will parse every block into its virtual file system. Always provide a clear summary of what you built.`;
   }
 
   function projectSnapshot() {
@@ -138,7 +143,7 @@ HOW TO WORK
 2. Vanilla HTML/CSS/JS and Google Fonts only. No CDN frameworks (Bootstrap, Tailwind, jQuery) unless the user explicitly asks.
 3. Responsive from 360px up. Semantic, accessible HTML. Dark mode when it fits the design.
 ${fileProtocolInstructions(useTools)}
-6. Reply conversationally between tool calls. Keep the user informed in plain, warm language — no hype, no exclamation marks.
+6. When done, always leave a helpful message for the user in the chat summarizing what you built, which files were created or modified, and what key features are included. Keep the tone warm, clear, and informative — no hype, no exclamation marks.
 
 DESIGN SKILL — follow it for every build:
 ${window.Vecode.Skill.SKILL_MD}${pluginCtx.prompt}${skillsCtx}
@@ -168,7 +173,7 @@ ${window.Vecode.Skill.SKILL_MD}${pluginCtx.review.length ? "\nPlugin-specific ch
 Rules:
 · ${useTools ? "Only rewrite files that actually need changes. Do not rewrite everything \"just to be safe\"." : "When fixes are needed, return every complete text file in the required block protocol so the project remains coherent."}
 · Verify code matches comments; delete comments claiming features that do not exist.
-· If the site is already good, ${useTools ? "call finish()" : "reply with"} a one-line verdict and change nothing.
+· If the site is already good, ${useTools ? "call finish() with" : "reply with"} a one-line verdict confirming the design passed review and change nothing.
 · After applying fixes, ${useTools ? "call finish() with" : "add"} a short summary of what you changed and why.`;
   }
 
@@ -197,6 +202,47 @@ Rules:
     const p = path.trim();
     if (!p || p.startsWith("/") || p.includes("..") || p.includes("\\")) return null;
     return p;
+  }
+
+  /* ---------------- completion message generator ---------------- */
+  function summarizeAgentAction(mode, writtenFiles, deletedFiles, userPrompt) {
+    const S = window.Vecode.State;
+    if (mode === "review") {
+      if (writtenFiles && writtenFiles.length) {
+        return `**Design review complete.** Audited the site against the Vecode design skill and refined the following files to improve layout, contrast, and typography:\n\n` +
+          writtenFiles.map((f) => `* \`${f}\``).join("\n") +
+          `\n\nAll anti-slop and responsiveness checks passed.`;
+      }
+      return `**Design review complete.** Audited the site against the Vecode design skill (typography hierarchy, contrast, base-8 grid, responsive layout, and anti-slop rules). The design meets all standards with no changes needed.`;
+    }
+
+    // mode === "build"
+    const files = writtenFiles || [];
+    if (files.length) {
+      const fileBullets = files.map((f) => {
+        let desc = "Project file";
+        if (f === "index.html") desc = "Main HTML document with semantic structure";
+        else if (f === "styles.css") desc = "Stylesheet with responsive layout, custom tokens, and typography";
+        else if (f === "script.js") desc = "Interactive behavior and UI logic";
+        else if (f.endsWith(".html")) desc = "Page template";
+        else if (f.endsWith(".css")) desc = "Styles";
+        else if (f.endsWith(".js")) desc = "Script";
+        return `* **\`${f}\`** — ${desc}`;
+      }).join("\n");
+
+      let msg = `I've built your site based on your request.\n\n**Files created/updated:**\n${fileBullets}`;
+      if (deletedFiles && deletedFiles.length) {
+        msg += `\n\n**Removed:** ${deletedFiles.map((f) => `\`${f}\``).join(", ")}`;
+      }
+      msg += `\n\nThe live preview on the right has been updated. You can interact with it, test mobile and tablet views, or tell me what you'd like to adjust next!`;
+      return msg;
+    }
+
+    if (S && S.listFiles && S.listFiles().length) {
+      return `I've checked the project files. Everything is up to date in the live preview. Tell me what you'd like to build, add, or customize next!`;
+    }
+
+    return `Ready to build. Describe what you'd like to create, and I'll generate the code.`;
   }
 
   async function executeTool(name, args) {
@@ -296,6 +342,8 @@ Rules:
         this.emit("status", { mode: mode === "review" ? "review" : "build", label: mode === "review" ? "Reviewing the design…" : "Building…" });
         let finalText = "";
         let finishMessage = null;
+        const writtenFiles = new Set();
+        const deletedFiles = new Set();
 
         for (let iter = 0; iter < MAX_TOOL_ITERATIONS; iter++) {
           if (signal.aborted) break;
@@ -316,7 +364,10 @@ Rules:
           const blocks = parseFileBlocks(result.text);
           const blockPaths = Object.keys(blocks);
           if (blockPaths.length) {
-            for (const p of blockPaths) S.writeFile(p, blocks[p]);
+            for (const p of blockPaths) {
+              S.writeFile(p, blocks[p]);
+              writtenFiles.add(p);
+            }
             this.emit("filesWritten", blockPaths.map((p) => ({ path: p, bytes: blocks[p].length, via: "block" })));
             result.text = stripFileBlocks(result.text); // keep only the prose
           }
@@ -341,7 +392,15 @@ Rules:
               }
               this.emit("toolResult", { name: tc.name, out });
               if (tc.name === "write_file" && typeof tc.args.path === "string") {
-                writtenByTools.push({ path: tc.args.path, bytes: String(tc.args.content || "").length, via: "tool" });
+                const sp = safePath(tc.args.path);
+                if (sp) {
+                  writtenFiles.add(sp);
+                  writtenByTools.push({ path: sp, bytes: String(tc.args.content || "").length, via: "tool" });
+                }
+              }
+              if (tc.name === "delete_file" && typeof tc.args.path === "string") {
+                const sp = safePath(tc.args.path);
+                if (sp) deletedFiles.add(sp);
               }
               if (tc.name === "finish") finishMessage = (tc.args && tc.args.message) || result.text || "";
               messages.push({ role: "tool", tool_call_id: tc.id, name: tc.name, content: out });
@@ -357,10 +416,18 @@ Rules:
           break;
         }
 
-        if (finishMessage !== null && finishMessage !== undefined) {
-          finalText = finishMessage;
-        } else if (signal.aborted && !finalText.trim()) {
-          finalText = "Build stopped.";
+        if (signal.aborted) {
+          finalText = "Build stopped. Your project files have been preserved.";
+        } else if (finishMessage !== null && typeof finishMessage === "string" && finishMessage.trim()) {
+          finalText = finishMessage.trim();
+        } else if (finalText && finalText.trim()) {
+          finalText = finalText.trim();
+          // If the model produced only an opening line without a summary of the work, append the completion summary
+          if (writtenFiles.size > 0 && /^(let me|i will|i'll|starting|building|here is|here are)\b/i.test(finalText) && !/built|created|completed|finished|summary|files/i.test(finalText)) {
+            finalText += "\n\n" + summarizeAgentAction(mode, Array.from(writtenFiles), Array.from(deletedFiles), userText);
+          }
+        } else {
+          finalText = summarizeAgentAction(mode, Array.from(writtenFiles), Array.from(deletedFiles), userText);
         }
         finalText = finalText.trim();
 
@@ -416,4 +483,5 @@ Rules:
   window.Vecode.Agent.buildSystemPrompt = buildSystemPrompt;
   window.Vecode.Agent.buildReviewSystemPrompt = buildReviewSystemPrompt;
   window.Vecode.Agent.parseFileBlocks = parseFileBlocks;
+  window.Vecode.Agent.summarizeAgentAction = summarizeAgentAction;
 })();
