@@ -240,11 +240,31 @@
   }
 
   /* ---------------- OpenAI-compatible (free, openai, gemini, openrouter, xai, custom) ---------------- */
+  // Vecode's internal message shape uses assistant.tool_calls: [{id, name, args}].
+  // The OpenAI wire format requires [{id, type:"function", function:{name, arguments}}]
+  // with arguments as a JSON string — translate before sending.
+  function toOpenAIMessages(messages) {
+    return messages.map((m) => {
+      if (m.role === "assistant" && m.tool_calls && m.tool_calls.length) {
+        return {
+          role: "assistant",
+          content: m.content || null,
+          tool_calls: m.tool_calls.map((tc) => ({
+            id: tc.id,
+            type: "function",
+            function: { name: tc.name, arguments: JSON.stringify(tc.args || {}) }
+          }))
+        };
+      }
+      return m;
+    });
+  }
+
   async function streamOpenAICompat(req, cfg, handlers, signal) {
     const url = (req.baseUrl || cfg.baseUrl) + "/chat/completions";
     const body = {
       model: req.model || cfg.model,
-      messages: req.messages,
+      messages: toOpenAIMessages(req.messages),
       temperature: typeof req.temperature === "number" ? req.temperature : undefined,
       stream: true,
       stream_options: { include_usage: true }

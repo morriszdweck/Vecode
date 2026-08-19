@@ -1,6 +1,7 @@
 /* ==========================================================================
    Vecode — full-app boot smoke test (jsdom)
-   Requires a static server on port 4173 serving the repository root.
+   Self-hosts a static server for the repository root — no manual server
+   step needed, so `npm run test:smoke` works standalone (and in CI).
    Exercises boot, onboarding, providers, plugins, files/editor, preview
    inlining/sandboxing, streaming agent flow, ZIP export and clear-chat.
    ========================================================================== */
@@ -16,12 +17,27 @@ const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
 const errors = [];
 const jsdomErrors = [];
 
-class LocalOnlyLoader extends ResourceLoader {
-  fetch(url, options) {
-    if (String(url).startsWith("http://localhost:4173/")) return super.fetch(url, options);
-    // Fonts and generated-site third-party assets are irrelevant to this test.
-    return Promise.resolve(Buffer.from(""));
-  }
+const MIME_TYPES = {
+  ".html": "text/html", ".js": "application/javascript", ".css": "text/css",
+  ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png"
+};
+
+function startStaticServer() {
+  const server = http.createServer((req, res) => {
+    const reqPath = decodeURIComponent(req.url.split("?")[0]);
+    const filePath = path.join(ROOT, reqPath === "/" ? "index.html" : reqPath);
+    if (!filePath.startsWith(ROOT)) { res.writeHead(403); res.end(); return; }
+    fs.readFile(filePath, (err, data) => {
+      if (err) { res.writeHead(404); res.end(); return; }
+      const ext = path.extname(filePath);
+      res.writeHead(200, { "Content-Type": MIME_TYPES[ext] || "application/octet-stream" });
+      res.end(data);
+    });
+  });
+  return new Promise((resolve, reject) => {
+    server.on("error", reject);
+    server.listen(0, "127.0.0.1", () => resolve(server));
+  });
 }
 
 const virtualConsole = new VirtualConsole();
@@ -29,8 +45,23 @@ virtualConsole.on("jsdomError", (error) => {
   if (!/Not implemented: HTMLCanvasElement/i.test(String(error && error.message))) jsdomErrors.push(String(error && error.stack || error));
 });
 
-const dom = new JSDOM(html, {
-  url: "http://localhost:4173/",
+let dom;
+let staticServer;
+
+async function buildDom() {
+  staticServer = await startStaticServer();
+  const origin = "http://127.0.0.1:" + staticServer.address().port;
+
+  class LocalOnlyLoader extends ResourceLoader {
+    fetch(url, options) {
+      if (String(url).startsWith(origin + "/")) return super.fetch(url, options);
+      // Fonts and generated-site third-party assets are irrelevant to this test.
+      return Promise.resolve(Buffer.from(""));
+    }
+  }
+
+  return new JSDOM(html, {
+  url: origin + "/",
   runScripts: "dangerously",
   resources: new LocalOnlyLoader(),
   virtualConsole,
@@ -69,7 +100,8 @@ const dom = new JSDOM(html, {
       originalError.apply(window.console, args);
     };
   }
-});
+  });
+}
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const $ = (selector) => dom.window.document.querySelector(selector);
@@ -90,6 +122,7 @@ function blobArrayBuffer(blob) {
 }
 
 async function main() {
+  dom = await buildDom();
   for (let i = 0; i < 50 && (!dom.window.Vecode || !dom.window.Vecode.App || $$("#promptChips .prompt-chip").length < 5); i++) await sleep(100);
   const { State, Agent, Providers, App, Zip } = dom.window.Vecode;
 
@@ -302,11 +335,13 @@ async function main() {
   assert.strictEqual(jsdomErrors.length, 0, "no jsdom runtime errors:\n" + jsdomErrors.join("\n"));
   console.log("\nApp smoke test passed ✓ (console errors: 0, all benign)");
   dom.window.close();
+  await new Promise((resolve) => staticServer.close(resolve));
   process.exit(0);
 }
 
 main().catch((error) => {
   console.error("\nSMOKE FAILURE:", error);
-  dom.window.close();
+  if (dom) dom.window.close();
+  if (staticServer) staticServer.close();
   process.exit(1);
 });

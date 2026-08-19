@@ -112,8 +112,7 @@ Vecode is a static site — this whole repo. Drag it onto Netlify Drop or `netli
 ```bash
 npm install
 npm test             # agent/provider/plugin/ZIP integration suite
-python3 -m http.server 4173 --bind 0.0.0.0
-npm run test:smoke   # in another shell: full-app jsdom smoke suite
+npm run test:smoke   # full-app jsdom smoke suite (self-hosts its own static server)
 ```
 
 The tests spin up mock OpenAI-compatible and Anthropic servers and drive the real browser modules: streaming tool and block-protocol loops, review prompts, reversible plugin injection, binary ZIP output, app boot, onboarding, settings, file editing, sandboxed preview transforms, export and chat clearing.

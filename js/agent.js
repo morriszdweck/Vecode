@@ -252,7 +252,9 @@ Rules:
         case "write_file": {
           const path = safePath(args.path);
           if (!path) return "Error: invalid path. Use a relative path like 'index.html' or 'pages/about.html'.";
-          const content = typeof args.content === "string" ? args.content : JSON.stringify(args.content);
+          const content = typeof args.content === "string" ? args.content
+            : args.content === undefined || args.content === null ? ""
+            : JSON.stringify(args.content);
           S.writeFile(path, content);
           return `Wrote ${content.length} bytes to ${path}.`;
         }
