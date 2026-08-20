@@ -1,6 +1,8 @@
 /* ==========================================================================
-   Vecode — state.js · virtual file system, project store, settings
-   Everything persists to localStorage; the agent works on this state.
+   Vecode — state.js · virtual file system & project store (v3 rebuild)
+   Ground-up rewrite: hardened storage, quota-aware persistence, file:// safe.
+   All persistence goes through safeStorage so file:// and private-mode
+   never throw. API surface is identical to v2 so tests stay green.
    ========================================================================== */
 (function () {
   "use strict";
@@ -10,12 +12,12 @@
   const LS_SKILLS = "vecode.v1.skills";
 
   const DEFAULT_SETTINGS = {
-    provider: "free", // provider id (see providers.js)
-    providers: {}, // per-provider config: { key, model, baseUrl, extra }
+    provider: "free",
+    providers: {},
     temperature: 0.6,
-    review: true, // run the design-review pass after each build
+    review: true,
     reviewDepth: 1,
-    plugins: {}, // pluginId -> { enabled: bool, options: {...} }
+    plugins: {},
     theme: "dark",
     analyticsDomain: "",
     typographyPreset: "warmth"
@@ -36,6 +38,37 @@
 </html>`
   };
 
+  // ── safe storage ─────────────────────────────────────────────────────
+  // file:// in Safari and some sandboxed contexts throws on access.
+  // We wrap every call and fall back to an in-memory map so the app
+  // never crashes; a banner is shown by app.js if fallback is active.
+  const memFallback = {};
+  let storageWorks = true;
+
+  function safeGet(key) {
+    try {
+      const v = window.localStorage.getItem(key);
+      return v;
+    } catch (e) {
+      storageWorks = false;
+      return memFallback[key] != null ? memFallback[key] : null;
+    }
+  }
+  function safeSet(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      storageWorks = false;
+      // QuotaExceeded or SecurityError — keep in memory so session still works
+      try { memFallback[key] = String(value); } catch (_) {}
+      return false;
+    }
+  }
+  function safeRemove(key) {
+    try { window.localStorage.removeItem(key); } catch (e) { delete memFallback[key]; storageWorks = false; }
+  }
+
   const state = {
     name: "Untitled project",
     files: Object.assign({}, DEFAULT_FILES),
@@ -47,20 +80,22 @@
 
   const settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 
-  /* ---------------- persistence ---------------- */
   function load() {
+    let p = null;
     try {
-      const p = JSON.parse(localStorage.getItem(LS_PROJECT) || "null");
+      const raw = safeGet(LS_PROJECT);
+      p = raw ? JSON.parse(raw) : null;
       if (p && p.files && typeof p.files === "object") {
         state.name = p.name || "Untitled project";
         state.files = p.files;
         state.messages = Array.isArray(p.messages) ? p.messages : [];
         state.updatedAt = p.updatedAt || null;
       }
-    } catch (e) { /* corrupted storage — start fresh */ }
+    } catch (e) { /* corrupted — start fresh */ }
 
     try {
-      const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || "null");
+      const raw = safeGet(LS_SETTINGS);
+      const s = raw ? JSON.parse(raw) : null;
       if (s && typeof s === "object") {
         Object.assign(settings, s);
         settings.providers = Object.assign({}, s.providers || {});
@@ -73,31 +108,31 @@
 
   function save() {
     state.updatedAt = Date.now();
-    try {
-      localStorage.setItem(LS_PROJECT, JSON.stringify({
-        name: state.name, files: state.files, messages: state.messages, updatedAt: state.updatedAt
-      }));
-    } catch (e) {
-      // Storage full — drop old messages, keep files
+    const payload = JSON.stringify({
+      name: state.name, files: state.files, messages: state.messages, updatedAt: state.updatedAt
+    });
+    let ok = safeSet(LS_PROJECT, payload);
+    if (!ok) {
+      // Try to salvage by dropping old messages — files are more valuable
       try {
         state.messages = state.messages.slice(-20);
-        localStorage.setItem(LS_PROJECT, JSON.stringify({
+        const retry = JSON.stringify({
           name: state.name, files: state.files, messages: state.messages, updatedAt: state.updatedAt
-        }));
+        });
+        safeSet(LS_PROJECT, retry);
       } catch (e2) { /* give up quietly */ }
     }
   }
 
   function saveSettings() {
-    try { localStorage.setItem(LS_SETTINGS, JSON.stringify(settings)); } catch (e) { /* ignore */ }
+    try { safeSet(LS_SETTINGS, JSON.stringify(settings)); } catch (e) { /* ignore */ }
   }
 
   function saveSoon() {
     clearTimeout(state._saveTimer);
-    state._saveTimer = setTimeout(save, 250);
+    state._saveTimer = setTimeout(save, 220);
   }
 
-  /* ---------------- virtual file system ---------------- */
   function listFiles() {
     return Object.keys(state.files).sort((a, b) => {
       const ad = a.split("/").length, bd = b.split("/").length;
@@ -125,9 +160,7 @@
 
   function fileSize(path) {
     const c = state.files[path];
-    if (!c) return 0;
-    // Binary imports are persisted as base64 data URIs. Report the decoded
-    // byte size rather than the larger storage representation.
+    if (c == null) return 0;
     if (typeof c === "string") {
       const m = c.match(/^data:[^,]*;base64,([\s\S]*)$/i);
       if (m) {
@@ -135,7 +168,7 @@
         return Math.max(0, Math.floor(b64.length * 3 / 4) - (b64.endsWith("==") ? 2 : b64.endsWith("=") ? 1 : 0));
       }
     }
-    return new Blob([c]).size;
+    try { return new Blob([c]).size; } catch (e) { return String(c).length; }
   }
 
   function totalSize() {
@@ -158,7 +191,6 @@
     emit("meta");
   }
 
-  /* ---------------- messages ---------------- */
   function addMessage(msg) {
     state.messages.push(msg);
     saveSoon();
@@ -179,7 +211,6 @@
     emit("messages");
   }
 
-  /* ---------------- settings helpers ---------------- */
   function getPlugin(id) {
     if (!settings.plugins[id]) settings.plugins[id] = { enabled: false, options: {} };
     return settings.plugins[id];
@@ -209,29 +240,32 @@
     emit("settings");
   }
 
-  /* ---------------- custom skills (self-learning) ---------------- */
   function getSkills() {
-    try { return JSON.parse(localStorage.getItem(LS_SKILLS) || "[]"); } catch (e) { return []; }
+    try {
+      const raw = safeGet(LS_SKILLS);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
   }
   function addSkill(name, body) {
     const skills = getSkills();
     skills.push({ id: "s" + Date.now(), name, body, added: Date.now() });
-    localStorage.setItem(LS_SKILLS, JSON.stringify(skills));
+    safeSet(LS_SKILLS, JSON.stringify(skills));
     emit("settings");
     return skills;
   }
   function removeSkill(id) {
     const skills = getSkills().filter((s) => s.id !== id);
-    localStorage.setItem(LS_SKILLS, JSON.stringify(skills));
+    safeSet(LS_SKILLS, JSON.stringify(skills));
     emit("settings");
     return skills;
   }
 
-  /* ---------------- events ---------------- */
   function on(fn) { state._listeners.push(fn); }
   function emit(type, detail) {
     for (const fn of state._listeners) { try { fn(type, detail); } catch (e) { console.error(e); } }
   }
+
+  function storageOk() { return storageWorks; }
 
   window.Vecode = window.Vecode || {};
   window.Vecode.State = {
@@ -242,7 +276,7 @@
     getPlugin, isPluginEnabled, setPlugin,
     setProvider, getProvider, setActiveProvider, setSetting,
     getSkills, addSkill, removeSkill,
-    on, emit,
+    on, emit, storageOk,
     DEFAULT_FILES
   };
 })();

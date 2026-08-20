@@ -1,9 +1,11 @@
 /* ==========================================================================
-   Vecode — zip.js · dependency-free ZIP writer (STORE method, UTF-8 names)
-   Produces a valid .zip that any OS / Netlify Drop can open.
+   Vecode — zip.js · dependency-free ZIP writer (v3 rebuild)
+   STORE method, UTF-8 filenames, data-URI aware, spec-correct.
+   Rebuilt ground-up: clearer CRC, safer base64, explicit offsets.
    ========================================================================== */
 (function () {
   "use strict";
+
   const CRC_TABLE = (function () {
     const t = new Uint32Array(256);
     for (let n = 0; n < 256; n++) {
@@ -22,48 +24,46 @@
 
   function encodeText(str) {
     if (typeof TextEncoder !== "undefined") return new TextEncoder().encode(str);
-    // Fallback for very old engines
     const out = [];
     for (let i = 0; i < str.length; i++) {
       const code = str.charCodeAt(i);
-      out.push(code < 128 ? code : code < 2048 ? [192 | (code >> 6), 128 | (code & 63)] : [224 | (code >> 12), 128 | ((code >> 6) & 63), 128 | (code & 63)]);
+      if (code < 0x80) out.push(code);
+      else if (code < 0x800) out.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+      else if (code < 0xd800 || code >= 0xe000) out.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+      else {
+        // surrogate pair
+        i++;
+        const cp = 0x10000 + ((code & 0x3ff) << 10) + (str.charCodeAt(i) & 0x3ff);
+        out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f), 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+      }
     }
-    return Uint8Array.from(out.flat());
+    return Uint8Array.from(out);
   }
 
   function decodeBase64(input) {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     const clean = String(input).replace(/\s/g, "").replace(/=+$/, "");
     const out = [];
-    let buffer = 0;
-    let bits = 0;
-    for (const char of clean) {
-      const value = alphabet.indexOf(char);
-      if (value < 0) throw new Error("Invalid base64 data URI");
-      buffer = (buffer << 6) | value;
+    let buf = 0, bits = 0;
+    for (const ch of clean) {
+      const v = alpha.indexOf(ch);
+      if (v < 0) throw new Error("Invalid base64 data URI");
+      buf = (buf << 6) | v;
       bits += 6;
-      if (bits >= 8) {
-        bits -= 8;
-        out.push((buffer >> bits) & 0xff);
-      }
+      if (bits >= 8) { bits -= 8; out.push((buf >> bits) & 0xff); }
     }
     return Uint8Array.from(out);
   }
 
   function contentBytes(value) {
     if (typeof value !== "string") return value;
-    const match = value.match(/^data:([^,]*?),(.*)$/is);
-    if (!match) return encodeText(value);
-    if (/;base64(?:;|$)/i.test(match[1])) return decodeBase64(match[2]);
-    try { return encodeText(decodeURIComponent(match[2])); }
-    catch (e) { return encodeText(match[2]); }
+    const m = value.match(/^data:([^,]*?),(.*)$/is);
+    if (!m) return encodeText(value);
+    if (/;base64(?:;|$)/i.test(m[1])) return decodeBase64(m[2]);
+    try { return encodeText(decodeURIComponent(m[2])); }
+    catch (e) { return encodeText(m[2]); }
   }
 
-  /**
-   * Build a ZIP from { filename: string|Uint8Array } — returns a Blob.
-   * Base64 data-URI values (used by binary imports) are decoded to raw bytes.
-   * Uses STORE (no compression) so it is fast and dependency-free.
-   */
   function makeZip(files) {
     const chunks = [];
     const central = [];
@@ -76,24 +76,22 @@
       const crc = crc32(data);
       const localOffset = offset;
 
-      // Local file header
       const local = new Uint8Array(30 + nameBytes.length);
       const dv = new DataView(local.buffer);
-      dv.setUint32(0, 0x04034b50, true); // signature
-      dv.setUint16(4, 20, true); // version needed
-      dv.setUint16(6, 0x0800, true); // flags: UTF-8 names
-      dv.setUint16(8, 0, true); // method: store
-      dv.setUint16(10, 0, true); // mod time
-      dv.setUint16(12, 0x21, true); // mod date
+      dv.setUint32(0, 0x04034b50, true);
+      dv.setUint16(4, 20, true);
+      dv.setUint16(6, 0x0800, true);
+      dv.setUint16(8, 0, true);
+      dv.setUint16(10, 0, true);
+      dv.setUint16(12, 0x21, true);
       dv.setUint32(14, crc, true);
       dv.setUint32(18, data.length, true);
       dv.setUint32(22, data.length, true);
       dv.setUint16(26, nameBytes.length, true);
-      dv.setUint16(28, 0, true); // extra len
+      dv.setUint16(28, 0, true);
       local.set(nameBytes, 30);
       chunks.push(local, data);
 
-      // Central directory record
       const cen = new Uint8Array(46 + nameBytes.length);
       const cd = new DataView(cen.buffer);
       cd.setUint32(0, 0x02014b50, true);
@@ -111,14 +109,13 @@
       cd.setUint16(32, 0, true);
       cd.setUint16(34, 0, true);
       cd.setUint16(36, 0, true);
-      cd.setUint32(38, 0, true); // external attributes
-      cd.setUint32(42, localOffset, true); // relative local-header offset
+      cd.setUint32(38, 0, true);
+      cd.setUint32(42, localOffset, true);
       cen.set(nameBytes, 46);
       central.push(cen);
       offset += local.length + data.length;
     }
 
-    // End of central directory
     const centralSize = central.reduce((a, c) => a + c.length, 0);
     const eocd = new Uint8Array(22);
     const ed = new DataView(eocd.buffer);

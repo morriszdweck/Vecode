@@ -16,7 +16,6 @@
 <body>
 <div id="app">
 
-  <!-- ================= topbar ================= -->
   <header id="topbar">
     <div class="brand">
       <span class="brand-mark serif">V</span>
@@ -38,10 +37,7 @@
     </div>
   </header>
 
-  <!-- ================= main ================= -->
   <div id="main">
-
-    <!-- rail -->
     <nav id="rail" aria-label="Sections">
       <p class="rail-label">Workspace</p>
       <button class="rail-item active" data-view="build"><span class="rail-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5 9.7 6.3 14.5 8 9.7 9.7 8 14.5 6.3 9.7 1.5 8 6.3 6.3Z"/></svg></span>Build</button>
@@ -56,7 +52,6 @@
       </div>
     </nav>
 
-    <!-- center column -->
     <section id="center">
       <div id="view-build" class="view active">
         <div id="chatScroll"><div id="chatLog"></div></div>
@@ -84,7 +79,6 @@
       <div id="view-deploy" class="view"></div>
     </section>
 
-    <!-- preview -->
     <section id="previewPane" aria-label="Live preview">
       <div class="preview-toolbar">
         <div class="device-seg" id="deviceSeg" role="group" aria-label="Preview device size"></div>
@@ -107,7 +101,6 @@
 <div id="modalRoot"></div>
 <div id="toastRoot"></div>
 
-<!-- scripts (plain, dependency-free, work from file:// too) -->
 <script src="skill/assets/decoding-texture.js"></script>
 <script src="js/state.js"></script>
 <script src="js/zip.js"></script>

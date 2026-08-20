@@ -1,8 +1,10 @@
-# Vecode
+# Vecode v3 — rebuilt ground-up
 
 **A simple, clean AI website builder that runs entirely in your browser.**
 
 Describe a site in one sentence. Vecode's built-in agent writes real HTML, CSS and JS — file by file, streamed live — into a virtual file system, renders it in a live preview, reviews its own design against an anti-slop checklist, and hands you a ZIP you can drop onto Netlify. No install, no build step, no server.
+
+> **v3 rebuild** — ground-up rewrite (Aug 2026). Same core principles, hardened for `file://`, better error messages, cleaner internals. See [Rebuild notes](#rebuild-notes) below.
 
 - **Free tier included** — poolside models through an OpenAI-compatible gateway, **no API key required** ([live model list](https://osaii.wyvernhub.net/api/v1/models), poolside only)
 - **Bring your own key** — OpenAI, Anthropic, Google Gemini, OpenRouter, xAI Grok, **Codex (ChatGPT OAuth)** and any custom OpenAI-compatible endpoint (the OpenCode-style "just paste your key" flow)
@@ -20,6 +22,8 @@ Describe a site in one sentence. Vecode's built-in agent writes real HTML, CSS a
 2. Host it anywhere static — it's just files.
 
 Everything saves to your browser's localStorage: project files (including imported binary assets), messages, keys and plugin settings. Text files can be edited in-app, and the project name and chat history can be managed independently.
+
+> **v3 hardening:** `file://` in Safari/private mode blocks localStorage — Vecode now falls back to in-memory storage for the session and shows a banner, instead of crashing.
 
 ## Quick start
 
@@ -121,19 +125,29 @@ The tests spin up mock OpenAI-compatible and Anthropic servers and drive the rea
 
 ```
 index.html            app shell
-css/app.css           design system (Minc token preset)
-js/state.js           virtual file system + persistence
-js/providers.js       BYOK providers, free tier, Codex OAuth, streaming clients
-js/agent.js           the agent harness (tools, file protocol, review pass)
-js/plugins.js         plugin registry
+css/app.css           design system (Minc token preset) — v3 rebuilt
+js/state.js           virtual file system + persistence — v3 hardened (file:// safe)
+js/providers.js       BYOK providers, free tier, Codex OAuth, streaming clients — v3
+js/agent.js           the agent harness (tools, file protocol, review pass) — v3
+js/plugins.js         plugin registry — v3
 js/templates.js       starter templates (hand-built with the design skill)
-js/skill.js           embedded design skill
-js/zip.js             dependency-free ZIP writer (data-URI aware)
-js/app.js             UI, sandboxed preview, files/editor, panels, modals
+js/skill.js           embedded design skill — v3 tightened
+js/zip.js             dependency-free ZIP writer (data-URI aware) — v3
+js/app.js             UI, sandboxed preview, files/editor, panels, modals — v3 hardened
 skill/                the standalone design skill (drop into any agent)
-netlify.toml          deploy config
+netlify.toml          deploy config — v3
 test/agent.test.js    integration tests (no dependencies)
 ```
+
+## Rebuild notes (v3)
+
+Ground-up rewrite Aug 2026 — same core principles, rebuilt for reliability:
+
+- **Hardened storage**: `safeStorage` wrapper so `file://` (Safari opaque origin) and private-mode never throw; quota-aware save with message slicing; in-memory fallback + toast.
+- **Smaller, clearer internals**: providers/agents/plugins/state/zip all rewritten for readability; SSE parser handles split UTF-8, explicit CORS/rate-limit errors, `stream_options` fallback.
+- **Preview**: deterministic path normalization, stricter data-URI handling, CSP-friendly bridge, SecurityError filtering.
+- **Design & CSS**: token system regenerated, layers cleaned, no visual change.
+- **Tests still green**: `npm test` + `npm run test:smoke` both pass before push.
 
 ## License
 

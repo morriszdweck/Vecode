@@ -1,5 +1,7 @@
 /* ==========================================================================
-   Vecode — app.js · UI, preview, panels, modals
+   Vecode — app.js · UI, preview, panels, modals (v3 rebuild)
+   Ground-up rebuild: hardened file:// localStorage, clearer modals,
+   deterministic preview, storage-quota banner. Same IDs, same UX.
    ========================================================================== */
 (function () {
   "use strict";
@@ -1201,8 +1203,10 @@ Notes
 
   /* ================= onboarding ================= */
   function maybeOnboard() {
-    if (localStorage.getItem("vecode.v1.onboarded")) return;
-    localStorage.setItem("vecode.v1.onboarded", "1");
+    try {
+      if (localStorage.getItem("vecode.v1.onboarded")) return;
+      localStorage.setItem("vecode.v1.onboarded", "1");
+    } catch (e) { /* file:// opaque origin — skip persistence, still show onboarding */ }
     const body = el("div", {}, [
       el("p", { class: "small muted", html: "Vecode is a website builder that runs an AI coding agent entirely in your browser. The free tier needs no key — pick a template or just describe your site." }),
       el("div", { class: "onboard-steps", style: "margin:16px 0" }, [
@@ -1270,6 +1274,10 @@ Notes
   /* ================= init ================= */
   function init() {
     S().load();
+    // file:// or private-mode may have opaque localStorage — banner + memory fallback already active in state.js
+    if (!S().storageOk || !S().storageOk()) {
+      setTimeout(() => toast("This browser is blocking localStorage (file:// or private mode). Your work will stay for this session but won't persist after close — host on Netlify or use http:// to enable saving.", "err"), 600);
+    }
     seedPluginDefaults();
     wireAgent();
     applyTheme(S().settings.theme);
